@@ -4,280 +4,309 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Manutenção</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
-    <!-- Header -->
-    <div class="header">
-        <h1>🔧 Sistema de Manutenção</h1>
-        <div class="user-info">
-            <span class="user-name" id="userName">Usuário</span>
-            <span class="user-badge" id="userBadge">Admin</span>
-            <button class="btn-logout" id="btnLogoutMenu">Sair</button>
-        </div>
-    </div>
 
-    <!-- Container Principal -->
-    <div class="main-container">
-        <!-- Menu Lateral -->
-        <div class="sidebar">
-            <div class="menu-item active" id="menuUsuarios">
-                <span class="menu-icon">👤</span>
-                <span>Cadastro de Usuários</span>
-            </div>
-            <div class="menu-item" id="menuPredial">
-                <span class="menu-icon">🏢</span>
-                <span>Manutenção Predial</span>
-            </div>
-            <div class="menu-item" id="menuEquipamentos">
-                <span class="menu-icon">⚙️</span>
-                <span>Manutenção Equipamentos</span>
-            </div>
-        </div>
-
-        <!-- Área de Conteúdo -->
-        <div class="content-area">
-            <!-- Seção: Cadastro de Usuários -->
-            <div class="content-section active" id="usuarios">
-                <div class="card">
-                    <h2>👤 Cadastrar Novo Usuário</h2>
-                    <div id="alertUsuarios"></div>
-                    
-                    <form id="formUsuario">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Nome Completo *</label>
-                                <input type="text" id="usuarioNome" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Usuário *</label>
-                                <input type="text" id="usuarioLogin" required>
-                            </div>
-                        </div>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Senha *</label>
-                                <input type="password" id="usuarioSenha" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Perfil *</label>
-                                <select id="usuarioPerfil" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="admin">Administrador</option>
-                                    <option value="tecnico">Técnico</option>
-                                    <option value="usuario">Usuário</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn">Cadastrar Usuário</button>
-                    </form>
-                </div>
-
-                <div class="card">
-                    <h2>📋 Usuários Cadastrados</h2>
-                    <div id="listaUsuarios">
-                        <div class="loading">
-                            <div class="spinner"></div>
-                            <p>Carregando usuários...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção: Manutenção Predial -->
-            <div class="content-section" id="predial">
-                <div class="card">
-                    <h2>🏢 Nova Manutenção Predial</h2>
-                    <div id="alertPredial"></div>
-                    
-                    <form id="formPredial">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Local *</label>
-                                <input type="text" id="predialLocal" placeholder="Ex: Sala 101, Corredor A" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Tipo de Manutenção *</label>
-                                <select id="predialTipo" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="eletrica">Elétrica</option>
-                                    <option value="hidraulica">Hidráulica</option>
-                                    <option value="pintura">Pintura</option>
-                                    <option value="estrutural">Estrutural</option>
-                                    <option value="limpeza">Limpeza</option>
-                                    <option value="outros">Outros</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Prioridade *</label>
-                                <select id="predialPrioridade" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="baixa">Baixa</option>
-                                    <option value="media">Média</option>
-                                    <option value="alta">Alta</option>
-                                    <option value="urgente">Urgente</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Data Prevista *</label>
-                                <input type="date" id="predialData" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Descrição do Problema *</label>
-                            <textarea id="predialDescricao" placeholder="Descreva detalhadamente o problema..." required></textarea>
-                        </div>
-                        <button type="submit" class="btn">Registrar Manutenção</button>
-                    </form>
-                </div>
-
-                <div class="card">
-                    <h2>📋 Manutenções Prediais Registradas</h2>
-                    <div id="listaPredial">
-                        <div class="loading">
-                            <div class="spinner"></div>
-                            <p>Carregando manutenções...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção: Manutenção de Equipamentos -->
-            <div class="content-section" id="equipamentos">
-                <div class="card">
-                    <h2>⚙️ Nova Manutenção de Equipamento</h2>
-                    <div id="alertEquipamentos"></div>
-                    
-                    <form id="formEquipamento">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Nome do Equipamento *</label>
-                                <input type="text" id="equipNome" placeholder="Ex: Ar Condicionado, Impressora" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Patrimônio/Série</label>
-                                <input type="text" id="equipPatrimonio" placeholder="Número de patrimônio">
-                            </div>
-                        </div>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Tipo de Manutenção *</label>
-                                <select id="equipTipo" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="preventiva">Preventiva</option>
-                                    <option value="corretiva">Corretiva</option>
-                                    <option value="preditiva">Preditiva</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Status *</label>
-                                <select id="equipStatus" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="pendente">Pendente</option>
-                                    <option value="andamento">Em Andamento</option>
-                                    <option value="concluido">Concluído</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Data da Manutenção *</label>
-                                <input type="date" id="equipData" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Responsável</label>
-                                <input type="text" id="equipResponsavel" placeholder="Nome do técnico">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Observações *</label>
-                            <textarea id="equipObservacoes" placeholder="Descreva o serviço realizado ou a ser realizado..." required></textarea>
-                        </div>
-                        <button type="submit" class="btn">Registrar Manutenção</button>
-                    </form>
-                </div>
-
-                <div class="card">
-                    <h2>📋 Manutenções de Equipamentos Registradas</h2>
-                    <div id="listaEquipamentos">
-                        <div class="loading">
-                            <div class="spinner"></div>
-                            <p>Carregando manutenções...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="js/auth.js"></script>
-    <script src="js/usuarios.js"></script>
-    <script src="js/manutencao.js"></script>
-    <script>
-        // Função para trocar seção ativa
-        function showSection(section) {
-            // Remove classe active de todos os itens do menu
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Remove classe active de todas as seções
-            document.querySelectorAll('.content-section').forEach(sec => {
-                sec.classList.remove('active');
-            });
-            
-            // Adiciona active na seção clicada
-            document.getElementById(section).classList.add('active');
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        // Proteger página e inicializar
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentUser = protectPage();
-            if (currentUser) {
-                // Atualizar informações do usuário
-                document.getElementById('userName').textContent = currentUser.nome;
-                document.getElementById('userBadge').textContent = currentUser.perfil || 'Usuário';
-                
-                // Eventos do menu
-                document.getElementById('menuUsuarios').addEventListener('click', function() {
-                    this.classList.add('active');
-                    document.getElementById('menuPredial').classList.remove('active');
-                    document.getElementById('menuEquipamentos').classList.remove('active');
-                    showSection('usuarios');
-                });
-                
-                document.getElementById('menuPredial').addEventListener('click', function() {
-                    this.classList.add('active');
-                    document.getElementById('menuUsuarios').classList.remove('active');
-                    document.getElementById('menuEquipamentos').classList.remove('active');
-                    showSection('predial');
-                });
-                
-                document.getElementById('menuEquipamentos').addEventListener('click', function() {
-                    this.classList.add('active');
-                    document.getElementById('menuUsuarios').classList.remove('active');
-                    document.getElementById('menuPredial').classList.remove('active');
-                    showSection('equipamentos');
-                });
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-                // Evento do botão logout
-                document.getElementById('btnLogoutMenu').addEventListener('click', handleLogout);
+        .container {
+            background: #ffffff;
+            max-width: 1000px;
+            width: 100%;
+            border-radius: 24px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 45% 55%;
+        }
 
-                // Eventos dos formulários
-                document.getElementById('formUsuario').addEventListener('submit', handleCadastroUsuario);
-                document.getElementById('formPredial').addEventListener('submit', handleManutencaoPredial);
-                document.getElementById('formEquipamento').addEventListener('submit', handleManutencaoEquipamento);
-                
-                // Carregar dados
-                loadUsuarios();
-                loadManutencoesPrediais();
-                loadManutencoesEquipamentos();
+        /* LADO ESQUERDO - VISUAL */
+        .hero-side {
+            background: linear-gradient(135deg, rgba(21, 101, 192, 0.95), rgba(13, 71, 161, 0.95)),
+                        url("https://images.unsplash.com/photo-1581091870627-3d94c5b8c7d3?auto=format&fit=crop&w=1000&q=80");
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero-side::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1), transparent);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-side h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero-side p {
+            font-size: 18px;
+            line-height: 1.6;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        /* LADO DIREITO - CONTEÚDO */
+        .content-side {
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .content-side h2 {
+            font-size: 32px;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+
+        .btn-access {
+            display: inline-block;
+            padding: 18px 0;
+            background: linear-gradient(135deg, #ff9800, #ffc107);
+            color: #fff;
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 600;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(255, 152, 0, 0.3);
+        }
+
+        .btn-access:hover {
+            transform: translateY(2px);
+            box-shadow: 0 10px 30px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn-access:active {
+            transform: translateY(2px);
+        }
+
+        .features {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* CREDENCIAIS - RODAPÉ */
+        .credentials {
+            margin-top: 50px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .credentials-title {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .credentials-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .credentials-info strong {
+            color: #ff9800;
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+
+            .hero-side {
+                min-height: 300px;
+                padding: 40px 30px;
+            }
+
+            .hero-side h1 {
+                font-size: 38px;
+            }
+
+            .content-side {
+                padding: 40px 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .hero-side {
+                min-height: 250px;
+                padding: 30px 20px;
+            }
+
+            .hero-side h1 {
+                font-size: 32px;
+            }
+
+            .hero-side p {
+                font-size: 16px;
+            }
+
+            .content-side {
+                padding: 30px 20px;
+            }
+
+            .content-side h2 {
+                font-size: 26px;
+            }
+
+            .features {
+                margin-top: 30px;
+                padding-top: 30px;
+            }
+
+            .feature-item {
+                margin-bottom: 15px;
+            }
+
+            .feature-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+
+            .credentials {
+                margin-top: 30px;
+            }
+
+            .credentials-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- LADO VISUAL -->
+        <div class="hero-side">
+            <div class="hero-content">
+                <h1>Manutenibilidade <br>Logistica</h1>
+                <p>Gestão para manutenções prediais e equipamentos.</p>
+            </div>
+        </div>
+
+        <!-- LADO CONTEÚDO -->
+        <div class="content-side">
+            <div>
+                <h2>Bem-vindo</h2>
+                <p class="subtitle">Controle total de seus equipamentos</p>
+
+                <a href="login.html" class="btn-access">Fazer login</a>
+
+                <div class="features">
+                    <div class="feature-item">
+                        <div class="feature-icon">🏢</div>
+                        <div class="feature-text">Controle de manutenção predial</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⚙️</div>
+                        <div class="feature-text">Gestão de equipamentos</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-text">Relatórios e histórico completo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                window.location.href = "login.html";
             }
         });
     </script>
+
 </body>
 </html>
