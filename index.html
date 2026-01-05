@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Manutenção</title>
-
     <style>
         * {
             margin: 0;
@@ -33,7 +32,6 @@
             grid-template-columns: 45% 55%;
         }
 
-        /* LADO ESQUERDO - VISUAL */
         .hero-side {
             background: linear-gradient(135deg, rgba(21, 101, 192, 0.95), rgba(13, 71, 161, 0.95)),
                         url("https://images.unsplash.com/photo-1581091870627-3d94c5b8c7d3?auto=format&fit=crop&w=1000&q=80");
@@ -77,7 +75,6 @@
             font-weight: 300;
         }
 
-        /* LADO DIREITO - CONTEÚDO */
         .content-side {
             padding: 60px 50px;
             display: flex;
@@ -113,12 +110,12 @@
         }
 
         .btn-access:hover {
-            transform: translateY(2px);
-            box-shadow: 0 10px 30px rgba(255, 152, 0, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(255, 152, 0, 0.4);
         }
 
         .btn-access:active {
-            transform: translateY(2px);
+            transform: translateY(0);
         }
 
         .features {
@@ -152,37 +149,6 @@
             font-weight: 500;
         }
 
-        /* CREDENCIAIS - RODAPÉ */
-        .credentials {
-            margin-top: 50px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .credentials-title {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .credentials-info {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            font-size: 14px;
-            color: #333;
-        }
-
-        .credentials-info strong {
-            color: #ff9800;
-        }
-
-        /* RESPONSIVO */
         @media (max-width: 900px) {
             .container {
                 grid-template-columns: 1fr;
@@ -248,56 +214,46 @@
                 height: 35px;
                 font-size: 18px;
             }
-
-            .credentials {
-                margin-top: 30px;
-            }
-
-            .credentials-info {
-                flex-direction: column;
-                gap: 8px;
-            }
         }
     </style>
 </head>
 
 <body>
-
     <div class="container">
-
-        <!-- LADO VISUAL -->
         <div class="hero-side">
             <div class="hero-content">
-                <h1>Manutenibilidade <br>Logistica</h1>
-                <p>Gestão para manutenções prediais e equipamentos.</p>
+                <h1>Manutenibilidade <br>Logística</h1>
+                <p>Gestão completa para manutenções prediais e equipamentos com rastreamento e controle de permissões.</p>
             </div>
         </div>
 
-        <!-- LADO CONTEÚDO -->
         <div class="content-side">
             <div>
                 <h2>Bem-vindo</h2>
-                <p class="subtitle">Controle total de seus equipamentos</p>
+                <p class="subtitle">Controle total de seus equipamentos e instalações</p>
 
                 <a href="login.html" class="btn-access">Fazer login</a>
 
                 <div class="features">
                     <div class="feature-item">
                         <div class="feature-icon">🏢</div>
-                        <div class="feature-text">Controle de manutenção predial</div>
+                        <div class="feature-text">Controle de manutenção predial com rastreamento</div>
                     </div>
                     <div class="feature-item">
                         <div class="feature-icon">⚙️</div>
-                        <div class="feature-text">Gestão de equipamentos</div>
+                        <div class="feature-text">Gestão de equipamentos e histórico</div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">📊</div>
-                        <div class="feature-text">Relatórios e histórico completo</div>
+                        <div class="feature-icon">📸</div>
+                        <div class="feature-text">Anexar fotos e documentação</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔐</div>
+                        <div class="feature-text">Sistema de permissões granulares</div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -307,6 +263,5 @@
             }
         });
     </script>
-
 </body>
 </html>
