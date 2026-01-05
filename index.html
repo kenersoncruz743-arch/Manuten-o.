@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Manutenção - Bem-vindo</title>
+    <title>Sistema de Manutenção</title>
 
     <style>
         * {
@@ -13,9 +13,9 @@
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #e3f2fd, #fff8e1);
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -24,213 +24,238 @@
 
         .container {
             background: #ffffff;
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
-            border-radius: 20px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+            border-radius: 24px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
             overflow: hidden;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 45% 55%;
         }
 
-        /* LADO DA IMAGEM */
-        .image-side {
-            background: linear-gradient(
-                rgba(0, 0, 0, 0.45),
-                rgba(0, 0, 0, 0.45)
-            ),
-            url("https://images.unsplash.com/photo-1581091870627-3d94c5b8c7d3?auto=format&fit=crop&w=1000&q=80");
+        /* LADO ESQUERDO - VISUAL */
+        .hero-side {
+            background: linear-gradient(135deg, rgba(21, 101, 192, 0.95), rgba(13, 71, 161, 0.95)),
+                        url("https://images.unsplash.com/photo-1581091870627-3d94c5b8c7d3?auto=format&fit=crop&w=1000&q=80");
             background-size: cover;
             background-position: center;
             color: #fff;
-            padding: 40px;
+            padding: 60px 40px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            position: relative;
         }
 
-        .image-side h1 {
-            font-size: 40px;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        .hero-side::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1), transparent);
+            pointer-events: none;
         }
 
-        .image-side p {
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-side h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero-side p {
             font-size: 18px;
             line-height: 1.6;
             opacity: 0.95;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            font-weight: 300;
         }
 
-        /* LADO DO CONTEÚDO */
+        /* LADO DIREITO - CONTEÚDO */
         .content-side {
-            padding: 50px 40px;
-            text-align: center;
+            padding: 60px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
         .content-side h2 {
-            font-size: 30px;
-            color: #1976d2;
-            margin-bottom: 10px;
+            font-size: 32px;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
-        .content-side > p {
-            color: #555;
+        .subtitle {
+            color: #666;
             font-size: 16px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .btn-access {
             display: inline-block;
-            padding: 16px 36px;
-            background: linear-gradient(135deg, #ffb300, #fb8c00);
+            padding: 18px 0;
+            background: linear-gradient(135deg, #ff9800, #ffc107);
             color: #fff;
             text-decoration: none;
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 600;
             border-radius: 12px;
             transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
         }
 
         .btn-access:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(251, 140, 0, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.4);
         }
 
         .btn-access:active {
-            transform: translateY(-1px);
+            transform: translateY(0);
         }
 
-        .info {
-            margin-top: 35px;
-            text-align: left;
+        .features {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid #e0e0e0;
         }
 
-        .info h3 {
-            color: #1976d2;
-            font-size: 18px;
-            margin-bottom: 10px;
-            margin-top: 15px;
-        }
-
-        .info h3:first-child {
-            margin-top: 0;
-        }
-
-        .credential-box {
-            background: #e3f2fd;
-            border-left: 5px solid #1976d2;
-            padding: 15px;
-            border-radius: 8px;
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
             margin-bottom: 20px;
-            font-size: 14px;
+            color: #333;
         }
 
-        .credential-box strong {
-            color: #0d47a1;
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
         }
 
-        .info ul {
-            margin-left: 18px;
-            color: #555;
+        .feature-text {
             font-size: 15px;
-            line-height: 1.6;
+            font-weight: 500;
         }
 
-        .info li {
-            margin-bottom: 8px;
+        /* CREDENCIAIS - RODAPÉ */
+        .credentials {
+            margin-top: 50px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: center;
         }
 
-        .note {
-            margin-top: 20px;
-            background: #fff3cd;
-            border: 1px solid #ffe082;
-            color: #795548;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .note code {
-            background: rgba(0, 0, 0, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
+        .credentials-title {
             font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .credentials-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .credentials-info strong {
+            color: #ff9800;
         }
 
         /* RESPONSIVO */
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .container {
                 grid-template-columns: 1fr;
+                max-width: 500px;
             }
 
-            .image-side {
-                min-height: 250px;
-                text-align: center;
-                padding: 30px 20px;
+            .hero-side {
+                min-height: 300px;
+                padding: 40px 30px;
             }
 
-            .image-side h1 {
-                font-size: 32px;
-            }
-
-            .image-side p {
-                font-size: 16px;
+            .hero-side h1 {
+                font-size: 38px;
             }
 
             .content-side {
                 padding: 40px 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .hero-side {
+                min-height: 250px;
+                padding: 30px 20px;
+            }
+
+            .hero-side h1 {
+                font-size: 32px;
+            }
+
+            .hero-side p {
+                font-size: 16px;
+            }
+
+            .content-side {
+                padding: 30px 20px;
             }
 
             .content-side h2 {
                 font-size: 26px;
             }
 
-            .btn-access {
-                padding: 14px 28px;
-                font-size: 16px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
+            .features {
+                margin-top: 30px;
+                padding-top: 30px;
             }
 
-            .container {
-                border-radius: 15px;
+            .feature-item {
+                margin-bottom: 15px;
             }
 
-            .image-side {
-                min-height: 200px;
-                padding: 25px 15px;
+            .feature-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
             }
 
-            .image-side h1 {
-                font-size: 28px;
+            .credentials {
+                margin-top: 30px;
             }
 
-            .content-side {
-                padding: 30px 20px;
-            }
-
-            .info h3 {
-                font-size: 16px;
-            }
-
-            .info ul {
-                font-size: 14px;
-            }
-
-            .note {
-                font-size: 13px;
+            .credentials-info {
+                flex-direction: column;
+                gap: 8px;
             }
         }
     </style>
@@ -240,44 +265,48 @@
 
     <div class="container">
 
-        <!-- IMAGEM -->
-        <div class="image-side">
-            <h1>🔧 Manutenção Inteligente</h1>
-            <p>
-                Organização, controle e eficiência para obras,
-                prédios e equipamentos em um único sistema.
-            </p>
+        <!-- LADO VISUAL -->
+        <div class="hero-side">
+            <div class="hero-content">
+                <h1>Sistema de<br>Manutenção</h1>
+                <p>Gestão completa e inteligente para manutenções prediais e equipamentos</p>
+            </div>
         </div>
 
-        <!-- CONTEÚDO -->
+        <!-- LADO CONTEÚDO -->
         <div class="content-side">
-            <h2>Sistema de Manutenção</h2>
-            <p>
-                Gerencie solicitações, acompanhe serviços
-                e mantenha tudo sob controle.
-            </p>
+            <div>
+                <h2>Bem-vindo</h2>
+                <p class="subtitle">Controle total das suas manutenções</p>
 
-            <a href="login.html" class="btn-access">Acessar Sistema</a>
+                <a href="login.html" class="btn-access">Acessar Sistema</a>
 
-            <div class="info">
-                <h3>📋 Credenciais de Teste</h3>
-                <div class="credential-box">
-                    <strong>Usuário:</strong> admin<br>
-                    <strong>Senha:</strong> 123456
+                <div class="features">
+                    <div class="feature-item">
+                        <div class="feature-icon">👥</div>
+                        <div class="feature-text">Gerenciamento de usuários</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🏢</div>
+                        <div class="feature-text">Controle de manutenção predial</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⚙️</div>
+                        <div class="feature-text">Gestão de equipamentos</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-text">Relatórios e histórico completo</div>
+                    </div>
                 </div>
+            </div>
 
-                <h3>✨ Funcionalidades</h3>
-                <ul>
-                    <li>Cadastro de usuários</li>
-                    <li>Manutenção predial</li>
-                    <li>Manutenção de equipamentos</li>
-                    <li>Controle de status</li>
-                    <li>Histórico completo</li>
-                </ul>
-
-                <div class="note">
-                    <strong>⚠️ Atenção:</strong> Configure corretamente as
-                    credenciais do Supabase em <code>js/auth.js</code>.
+            <!-- CREDENCIAIS NO RODAPÉ -->
+            <div class="credentials">
+                <div class="credentials-title">Acesso de Teste</div>
+                <div class="credentials-info">
+                    <span><strong>Usuário:</strong> admin</span>
+                    <span><strong>Senha:</strong> 123456</span>
                 </div>
             </div>
         </div>
@@ -285,20 +314,333 @@
     </div>
 
     <script>
-        // Permitir acesso ao sistema pressionando Enter
         document.addEventListener("keypress", function (e) {
             if (e.key === "Enter") {
                 window.location.href = "login.html";
             }
         });
+    </script>
 
-        // Verificar se há erro de rede ao carregar a imagem
-        window.addEventListener('load', function() {
-            const imageDiv = document.querySelector('.image-side');
-            if (imageDiv) {
-                // Adicionar fallback caso a imagem não carregue
-                imageDiv.style.backgroundImage = imageDiv.style.backgroundImage || 
-                    'linear-gradient(135deg, #1976d2, #0d47a1)';
+</body>
+</html><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Manutenção</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            max-width: 1000px;
+            width: 100%;
+            border-radius: 24px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 45% 55%;
+        }
+
+        /* LADO ESQUERDO - VISUAL */
+        .hero-side {
+            background: linear-gradient(135deg, rgba(21, 101, 192, 0.95), rgba(13, 71, 161, 0.95)),
+                        url("https://images.unsplash.com/photo-1581091870627-3d94c5b8c7d3?auto=format&fit=crop&w=1000&q=80");
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero-side::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1), transparent);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-side h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero-side p {
+            font-size: 18px;
+            line-height: 1.6;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        /* LADO DIREITO - CONTEÚDO */
+        .content-side {
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .content-side h2 {
+            font-size: 32px;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+
+        .btn-access {
+            display: inline-block;
+            padding: 18px 0;
+            background: linear-gradient(135deg, #ff9800, #ffc107);
+            color: #fff;
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        .btn-access:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn-access:active {
+            transform: translateY(0);
+        }
+
+        .features {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* CREDENCIAIS - RODAPÉ */
+        .credentials {
+            margin-top: 50px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .credentials-title {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .credentials-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .credentials-info strong {
+            color: #ff9800;
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+
+            .hero-side {
+                min-height: 300px;
+                padding: 40px 30px;
+            }
+
+            .hero-side h1 {
+                font-size: 38px;
+            }
+
+            .content-side {
+                padding: 40px 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .hero-side {
+                min-height: 250px;
+                padding: 30px 20px;
+            }
+
+            .hero-side h1 {
+                font-size: 32px;
+            }
+
+            .hero-side p {
+                font-size: 16px;
+            }
+
+            .content-side {
+                padding: 30px 20px;
+            }
+
+            .content-side h2 {
+                font-size: 26px;
+            }
+
+            .features {
+                margin-top: 30px;
+                padding-top: 30px;
+            }
+
+            .feature-item {
+                margin-bottom: 15px;
+            }
+
+            .feature-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+
+            .credentials {
+                margin-top: 30px;
+            }
+
+            .credentials-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- LADO VISUAL -->
+        <div class="hero-side">
+            <div class="hero-content">
+                <h1>Sistema de<br>Manutenção</h1>
+                <p>Gestão completa e inteligente para manutenções prediais e equipamentos</p>
+            </div>
+        </div>
+
+        <!-- LADO CONTEÚDO -->
+        <div class="content-side">
+            <div>
+                <h2>Bem-vindo</h2>
+                <p class="subtitle">Controle total das suas manutenções</p>
+
+                <a href="login.html" class="btn-access">Acessar Sistema</a>
+
+                <div class="features">
+                    <div class="feature-item">
+                        <div class="feature-icon">👥</div>
+                        <div class="feature-text">Gerenciamento de usuários</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🏢</div>
+                        <div class="feature-text">Controle de manutenção predial</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⚙️</div>
+                        <div class="feature-text">Gestão de equipamentos</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-text">Relatórios e histórico completo</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREDENCIAIS NO RODAPÉ -->
+            <div class="credentials">
+                <div class="credentials-title">Acesso de Teste</div>
+                <div class="credentials-info">
+                    <span><strong>Usuário:</strong> admin</span>
+                    <span><strong>Senha:</strong> 123456</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                window.location.href = "login.html";
             }
         });
     </script>
