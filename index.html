@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Manutenção - Bem-vindo</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e3f2fd, #fff8e1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            max-width: 900px;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        /* LADO DA IMAGEM */
+        .image-side {
+            background: linear-gradient(
+                rgba(0, 0, 0, 0.45),
+                rgba(0, 0, 0, 0.45)
+            ),
+            url("https://images.unsplash.com/photo-1581091870627-3d94c5b8c7d3?auto=format&fit=crop&w=1000&q=80");
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .image-side h1 {
+            font-size: 40px;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .image-side p {
+            font-size: 18px;
+            line-height: 1.6;
+            opacity: 0.95;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* LADO DO CONTEÚDO */
+        .content-side {
+            padding: 50px 40px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .content-side h2 {
+            font-size: 30px;
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .content-side > p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .btn-access {
+            display: inline-block;
+            padding: 16px 36px;
+            background: linear-gradient(135deg, #ffb300, #fb8c00);
+            color: #fff;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-access:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(251, 140, 0, 0.4);
+        }
+
+        .btn-access:active {
+            transform: translateY(-1px);
+        }
+
+        .info {
+            margin-top: 35px;
+            text-align: left;
+        }
+
+        .info h3 {
+            color: #1976d2;
+            font-size: 18px;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+
+        .info h3:first-child {
+            margin-top: 0;
+        }
+
+        .credential-box {
+            background: #e3f2fd;
+            border-left: 5px solid #1976d2;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .credential-box strong {
+            color: #0d47a1;
+        }
+
+        .info ul {
+            margin-left: 18px;
+            color: #555;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .info li {
+            margin-bottom: 8px;
+        }
+
+        .note {
+            margin-top: 20px;
+            background: #fff3cd;
+            border: 1px solid #ffe082;
+            color: #795548;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .note code {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .image-side {
+                min-height: 250px;
+                text-align: center;
+                padding: 30px 20px;
+            }
+
+            .image-side h1 {
+                font-size: 32px;
+            }
+
+            .image-side p {
+                font-size: 16px;
+            }
+
+            .content-side {
+                padding: 40px 30px;
+            }
+
+            .content-side h2 {
+                font-size: 26px;
+            }
+
+            .btn-access {
+                padding: 14px 28px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 15px;
+            }
+
+            .image-side {
+                min-height: 200px;
+                padding: 25px 15px;
+            }
+
+            .image-side h1 {
+                font-size: 28px;
+            }
+
+            .content-side {
+                padding: 30px 20px;
+            }
+
+            .info h3 {
+                font-size: 16px;
+            }
+
+            .info ul {
+                font-size: 14px;
+            }
+
+            .note {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- IMAGEM -->
+        <div class="image-side">
+            <h1>🔧 Manutenção Inteligente</h1>
+            <p>
+                Organização, controle e eficiência para obras,
+                prédios e equipamentos em um único sistema.
+            </p>
+        </div>
+
+        <!-- CONTEÚDO -->
+        <div class="content-side">
+            <h2>Sistema de Manutenção</h2>
+            <p>
+                Gerencie solicitações, acompanhe serviços
+                e mantenha tudo sob controle.
+            </p>
+
+            <a href="login.html" class="btn-access">Acessar Sistema</a>
+
+            <div class="info">
+                <h3>📋 Credenciais de Teste</h3>
+                <div class="credential-box">
+                    <strong>Usuário:</strong> admin<br>
+                    <strong>Senha:</strong> 123456
+                </div>
+
+                <h3>✨ Funcionalidades</h3>
+                <ul>
+                    <li>Cadastro de usuários</li>
+                    <li>Manutenção predial</li>
+                    <li>Manutenção de equipamentos</li>
+                    <li>Controle de status</li>
+                    <li>Histórico completo</li>
+                </ul>
+
+                <div class="note">
+                    <strong>⚠️ Atenção:</strong> Configure corretamente as
+                    credenciais do Supabase em <code>js/auth.js</code>.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Permitir acesso ao sistema pressionando Enter
+        document.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                window.location.href = "login.html";
+            }
+        });
+
+        // Verificar se há erro de rede ao carregar a imagem
+        window.addEventListener('load', function() {
+            const imageDiv = document.querySelector('.image-side');
+            if (imageDiv) {
+                // Adicionar fallback caso a imagem não carregue
+                imageDiv.style.backgroundImage = imageDiv.style.backgroundImage || 
+                    'linear-gradient(135deg, #1976d2, #0d47a1)';
+            }
+        });
+    </script>
+
+</body>
+</html>
