@@ -543,17 +543,40 @@
     </div>
 
     <script>
-        // Configuração do Supabase
-        const supabaseUrl = 'https://wcfrwsgnxochxvwhxnvy.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjZnJ3c2dueG9jaHh2d2h4bnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzExMDgsImV4cCI6MjA4MzIwNzEwOH0.Yb4cT5chXp3S8NZaWbLpv436HzxGCO7CZTruPpOPDdU';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        // Aguardar o carregamento completo do Supabase
+        (function() {
+            // Verificar se o Supabase já foi carregado
+            function initSupabase() {
+                if (typeof window.supabase === 'undefined') {
+                    console.error('Supabase não carregado. Recarregue a página.');
+                    return null;
+                }
 
-        // Carregar dados ao iniciar
-        window.addEventListener('DOMContentLoaded', function() {
-            loadUsuarios();
-            loadManutencoesPrediais();
-            loadManutencoesEquipamentos();
-        });
+                // Configuração
+                const supabaseUrl = 'https://wcfrwsgnxochxvwhxnvy.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjZnJ3c2dueG9jaHh2d2h4bnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzExMDgsImV4cCI6MjA4MzIwNzEwOH0.Yb4cT5chXp3S8NZaWbLpv436HzxGCO7CZTruPpOPDdU';
+                
+                return window.supabase.createClient(supabaseUrl, supabaseKey);
+            }
+
+            // Aguardar DOM carregar
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+            function init() {
+                // Inicializar cliente Supabase
+                window.db = initSupabase();
+                
+                if (window.db) {
+                    loadUsuarios();
+                    loadManutencoesPrediais();
+                    loadManutencoesEquipamentos();
+                }
+            }
+        })();
 
         // Trocar seção
         function showSection(section) {
@@ -592,7 +615,7 @@
 
             try {
                 // Verificar se usuário já existe
-                const { data: existing } = await supabase
+                const { data: existing } = await window.db
                     .from('usuarios')
                     .select('usuario')
                     .eq('usuario', usuario)
@@ -604,7 +627,7 @@
                 }
 
                 // Inserir novo usuário
-                const { data, error } = await supabase
+                const { data, error } = await window.db
                     .from('usuarios')
                     .insert([{ nome, usuario, senha, perfil }])
                     .select();
@@ -628,7 +651,7 @@
         // Carregar usuários
         async function loadUsuarios() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await window.db
                     .from('usuarios')
                     .select('*')
                     .order('created_at', { ascending: false });
@@ -688,7 +711,7 @@
             const descricao = document.getElementById('predialDescricao').value.trim();
 
             try {
-                const { error } = await supabase
+                const { error } = await window.db
                     .from('manutencao_predial')
                     .insert([{ 
                         local, 
@@ -714,7 +737,7 @@
         // Carregar manutenções prediais
         async function loadManutencoesPrediais() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await window.db
                     .from('manutencao_predial')
                     .select('*')
                     .order('created_at', { ascending: false });
@@ -778,7 +801,7 @@
             const observacoes = document.getElementById('equipObservacoes').value.trim();
 
             try {
-                const { error } = await supabase
+                const { error } = await window.db
                     .from('manutencao_equipamentos')
                     .insert([{ 
                         equipamento: nome,
@@ -805,7 +828,7 @@
         // Carregar manutenções de equipamentos
         async function loadManutencoesEquipamentos() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await window.db
                     .from('manutencao_equipamentos')
                     .select('*')
                     .order('created_at', { ascending: false });
