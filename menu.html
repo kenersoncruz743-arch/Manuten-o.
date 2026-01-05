@@ -9,12 +9,12 @@
 </head>
 <body>
     <!-- Header -->
-    <div class="header">
+    <div class="header">a
         <h1>🔧 Sistema de Manutenção</h1>
         <div class="user-info">
             <span class="user-name" id="userName">Usuário</span>
             <span class="user-badge" id="userBadge">Admin</span>
-            <button class="btn-logout" onclick="handleLogout()">Sair</button>
+            <button class="btn-logout" id="btnLogoutMenu">Sair</button>
         </div>
     </div>
 
@@ -22,15 +22,15 @@
     <div class="main-container">
         <!-- Menu Lateral -->
         <div class="sidebar">
-            <div class="menu-item active" onclick="showSection('usuarios')">
+            <div class="menu-item active" id="menuUsuarios">
                 <span class="menu-icon">👤</span>
                 <span>Cadastro de Usuários</span>
             </div>
-            <div class="menu-item" onclick="showSection('predial')">
+            <div class="menu-item" id="menuPredial">
                 <span class="menu-icon">🏢</span>
                 <span>Manutenção Predial</span>
             </div>
-            <div class="menu-item" onclick="showSection('equipamentos')">
+            <div class="menu-item" id="menuEquipamentos">
                 <span class="menu-icon">⚙️</span>
                 <span>Manutenção Equipamentos</span>
             </div>
@@ -44,7 +44,7 @@
                     <h2>👤 Cadastrar Novo Usuário</h2>
                     <div id="alertUsuarios"></div>
                     
-                    <form onsubmit="handleCadastroUsuario(event)">
+                    <form id="formUsuario">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Nome Completo *</label>
@@ -91,7 +91,7 @@
                     <h2>🏢 Nova Manutenção Predial</h2>
                     <div id="alertPredial"></div>
                     
-                    <form onsubmit="handleManutencaoPredial(event)">
+                    <form id="formPredial">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Local *</label>
@@ -151,7 +151,7 @@
                     <h2>⚙️ Nova Manutenção de Equipamento</h2>
                     <div id="alertEquipamentos"></div>
                     
-                    <form onsubmit="handleManutencaoEquipamento(event)">
+                    <form id="formEquipamento">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Nome do Equipamento *</label>
@@ -218,6 +218,22 @@
     <script src="js/usuarios.js"></script>
     <script src="js/manutencao.js"></script>
     <script>
+        // Função para trocar seção ativa
+        function showSection(section) {
+            // Remove classe active de todos os itens do menu
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Remove classe active de todas as seções
+            document.querySelectorAll('.content-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            
+            // Adiciona active na seção clicada
+            document.getElementById(section).classList.add('active');
+        }
+
         // Proteger página e inicializar
         document.addEventListener('DOMContentLoaded', function() {
             const currentUser = protectPage();
@@ -225,6 +241,36 @@
                 // Atualizar informações do usuário
                 document.getElementById('userName').textContent = currentUser.nome;
                 document.getElementById('userBadge').textContent = currentUser.perfil || 'Usuário';
+                
+                // Eventos do menu
+                document.getElementById('menuUsuarios').addEventListener('click', function() {
+                    this.classList.add('active');
+                    document.getElementById('menuPredial').classList.remove('active');
+                    document.getElementById('menuEquipamentos').classList.remove('active');
+                    showSection('usuarios');
+                });
+                
+                document.getElementById('menuPredial').addEventListener('click', function() {
+                    this.classList.add('active');
+                    document.getElementById('menuUsuarios').classList.remove('active');
+                    document.getElementById('menuEquipamentos').classList.remove('active');
+                    showSection('predial');
+                });
+                
+                document.getElementById('menuEquipamentos').addEventListener('click', function() {
+                    this.classList.add('active');
+                    document.getElementById('menuUsuarios').classList.remove('active');
+                    document.getElementById('menuPredial').classList.remove('active');
+                    showSection('equipamentos');
+                });
+
+                // Evento do botão logout
+                document.getElementById('btnLogoutMenu').addEventListener('click', handleLogout);
+
+                // Eventos dos formulários
+                document.getElementById('formUsuario').addEventListener('submit', handleCadastroUsuario);
+                document.getElementById('formPredial').addEventListener('submit', handleManutencaoPredial);
+                document.getElementById('formEquipamento').addEventListener('submit', handleManutencaoEquipamento);
                 
                 // Carregar dados
                 loadUsuarios();
