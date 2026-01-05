@@ -275,8 +275,8 @@
             </div>
 
             <div class="tabs">
-                <button class="tab active" onclick="showTab('login')">Login</button>
-                <button class="tab" onclick="showTab('register')">Cadastrar</button>
+                <button class="tab active" id="tabLogin">Login</button>
+                <button class="tab" id="tabRegister">Cadastrar</button>
             </div>
 
             <div class="content">
@@ -292,7 +292,7 @@
                         <label>Senha</label>
                         <input type="password" id="loginPass" placeholder="Digite sua senha">
                     </div>
-                    <button class="btn" onclick="handleLogin()">Entrar</button>
+                    <button class="btn" id="btnLogin">Entrar</button>
                 </div>
 
                 <!-- Formulário de Registro -->
@@ -309,7 +309,7 @@
                         <label>Senha</label>
                         <input type="password" id="regPass" placeholder="Escolha uma senha">
                     </div>
-                    <button class="btn" onclick="handleRegister()">Criar Conta</button>
+                    <button class="btn" id="btnRegister">Criar Conta</button>
                 </div>
             </div>
         </div>
@@ -321,7 +321,7 @@
                     <h2 id="userName">Carregando...</h2>
                     <p id="userLogin">@usuario</p>
                 </div>
-                <button class="btn-logout" onclick="handleLogout()">Sair</button>
+                <button class="btn-logout" id="btnLogout">Sair</button>
             </div>
             <div class="users-table">
                 <h3>👥 Usuários Cadastrados</h3>
@@ -337,21 +337,57 @@
 
     <script>
         // ⚠️ SUBSTITUA ESTAS CREDENCIAIS PELAS SUAS DO SUPABASE
-        const SUPABASE_URL = 'https://wcfrwsgnxochxvwhxnvy.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjZnJ3c2dueG9jaHh2d2h4bnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzExMDgsImV4cCI6MjA4MzIwNzEwOH0.Yb4cT5chXp3S8NZaWbLpv436HzxGCO7CZTruPpOPDdU';
+        const SUPABASE_URL = 'SUA_URL_AQUI';
+        const SUPABASE_KEY = 'SUA_CHAVE_AQUI';
 
         // Inicializar Supabase
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentUser = null;
 
+        // Inicializar eventos quando o DOM carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Eventos das abas
+            document.getElementById('tabLogin').addEventListener('click', function() {
+                showTab('login');
+            });
+            document.getElementById('tabRegister').addEventListener('click', function() {
+                showTab('register');
+            });
+
+            // Eventos dos botões
+            document.getElementById('btnLogin').addEventListener('click', handleLogin);
+            document.getElementById('btnRegister').addEventListener('click', handleRegister);
+            document.getElementById('btnLogout').addEventListener('click', handleLogout);
+
+            // Permitir Enter nos campos
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const form = input.closest('.form-view');
+                        if (form.id === 'loginForm') {
+                            handleLogin();
+                        } else if (form.id === 'registerForm') {
+                            handleRegister();
+                        }
+                    }
+                });
+            });
+        });
+
         // Alternar entre abas
         function showTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.form-view').forEach(v => v.classList.remove('active'));
             
-            event.target.classList.add('active');
-            document.getElementById(tab + 'Form').classList.add('active');
+            if (tab === 'login') {
+                document.getElementById('tabLogin').classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.getElementById('tabRegister').classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
             hideAlert();
         }
 
@@ -410,7 +446,7 @@
                 document.getElementById('regPass').value = '';
                 
                 setTimeout(() => {
-                    document.querySelectorAll('.tab')[0].click();
+                    showTab('login');
                 }, 2000);
 
             } catch (error) {
@@ -521,23 +557,6 @@
             document.getElementById('loginPass').value = '';
             hideAlert();
         }
-
-        // Permitir Enter nos campos
-        document.addEventListener('DOMContentLoaded', () => {
-            const inputs = document.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        const form = input.closest('.form-view');
-                        if (form.id === 'loginForm') {
-                            handleLogin();
-                        } else if (form.id === 'registerForm') {
-                            handleRegister();
-                        }
-                    }
-                });
-            });
-        });
     </script>
 </body>
 </html>
