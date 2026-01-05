@@ -18,7 +18,6 @@
             min-height: 100vh;
         }
 
-        /* Header */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -63,13 +62,11 @@
             color: #667eea;
         }
 
-        /* Container Principal */
         .main-container {
             display: flex;
             height: calc(100vh - 80px);
         }
 
-        /* Menu Lateral */
         .sidebar {
             width: 250px;
             background: white;
@@ -104,7 +101,6 @@
             font-size: 20px;
         }
 
-        /* Área de Conteúdo */
         .content-area {
             flex: 1;
             padding: 30px;
@@ -119,7 +115,6 @@
             display: block;
         }
 
-        /* Cards */
         .card {
             background: white;
             border-radius: 12px;
@@ -137,7 +132,6 @@
             gap: 10px;
         }
 
-        /* Formulários */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -182,7 +176,6 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        /* Botões */
         .btn {
             padding: 12px 24px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -204,11 +197,6 @@
             transform: translateY(0);
         }
 
-        .btn-secondary {
-            background: #6c757d;
-        }
-
-        /* Alertas */
         .alert {
             padding: 15px 20px;
             border-radius: 8px;
@@ -228,7 +216,6 @@
             border: 1px solid #f5c6cb;
         }
 
-        /* Tabelas */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -281,13 +268,21 @@
             color: #0f5132;
         }
 
-        .btn-table {
-            padding: 6px 12px;
-            font-size: 12px;
-            margin-right: 5px;
+        .badge-admin {
+            background: #e7d1ff;
+            color: #5a008f;
         }
 
-        /* Loading */
+        .badge-tecnico {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .badge-usuario {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
         .loading {
             text-align: center;
             padding: 40px;
@@ -309,7 +304,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Responsivo */
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -348,34 +342,30 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
     <div class="header">
         <h1>🔧 Sistema de Manutenção</h1>
         <div class="user-info">
-            <span class="user-name" id="userName">Usuário</span>
-            <button class="btn-logout" id="btnLogout">Sair</button>
+            <span class="user-name" id="userName">Administrador</span>
+            <button class="btn-logout" onclick="handleLogout()">Sair</button>
         </div>
     </div>
 
-    <!-- Container Principal -->
     <div class="main-container">
-        <!-- Menu Lateral -->
         <div class="sidebar">
-            <div class="menu-item active" data-section="usuarios">
+            <div class="menu-item active" onclick="showSection('usuarios')">
                 <span class="menu-icon">👤</span>
                 <span>Cadastro de Usuários</span>
             </div>
-            <div class="menu-item" data-section="predial">
+            <div class="menu-item" onclick="showSection('predial')">
                 <span class="menu-icon">🏢</span>
                 <span>Manutenção Predial</span>
             </div>
-            <div class="menu-item" data-section="equipamentos">
+            <div class="menu-item" onclick="showSection('equipamentos')">
                 <span class="menu-icon">⚙️</span>
                 <span>Manutenção Equipamentos</span>
             </div>
         </div>
 
-        <!-- Área de Conteúdo -->
         <div class="content-area">
             <!-- Seção: Cadastro de Usuários -->
             <div class="content-section active" id="usuarios">
@@ -383,7 +373,7 @@
                     <h2>👤 Cadastrar Novo Usuário</h2>
                     <div id="alertUsuarios"></div>
                     
-                    <form id="formUsuario">
+                    <form onsubmit="handleCadastroUsuario(event)">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Nome Completo *</label>
@@ -430,7 +420,7 @@
                     <h2>🏢 Nova Manutenção Predial</h2>
                     <div id="alertPredial"></div>
                     
-                    <form id="formPredial">
+                    <form onsubmit="handleManutencaoPredial(event)">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Local *</label>
@@ -490,7 +480,7 @@
                     <h2>⚙️ Nova Manutenção de Equipamento</h2>
                     <div id="alertEquipamentos"></div>
                     
-                    <form id="formEquipamento">
+                    <form onsubmit="handleManutencaoEquipamento(event)">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Nome do Equipamento *</label>
@@ -553,41 +543,13 @@
     </div>
 
     <script>
-        // ⚠️ SUBSTITUA ESTAS CREDENCIAIS PELAS SUAS DO SUPABASE
-        const SUPABASE_URL = 'https://wcfrwsgnxochxvwhxnvy.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjZnJ3c2dueG9jaHh2d2h4bnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzExMDgsImV4cCI6MjA4MzIwNzEwOH0.Yb4cT5chXp3S8NZaWbLpv436HzxGCO7CZTruPpOPDdU';
+        // Configuração do Supabase
+        const supabaseUrl = 'https://wcfrwsgnxochxvwhxnvy.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjZnJ3c2dueG9jaHh2d2h4bnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzExMDgsImV4cCI6MjA4MzIwNzEwOH0.Yb4cT5chXp3S8NZaWbLpv436HzxGCO7CZTruPpOPDdU';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Inicializar Supabase (evitar redeclaração)
-        let supabase;
-        if (typeof window.supabaseClient === 'undefined') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            window.supabaseClient = supabase;
-        } else {
-            supabase = window.supabaseClient;
-        }
-        
-        let currentUser = { nome: 'Administrador', usuario: 'admin' };
-
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
-            // Menu de navegação
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    const section = this.dataset.section;
-                    showSection(section);
-                });
-            });
-
-            // Formulários
-            document.getElementById('formUsuario').addEventListener('submit', handleCadastroUsuario);
-            document.getElementById('formPredial').addEventListener('submit', handleManutencaoPredial);
-            document.getElementById('formEquipamento').addEventListener('submit', handleManutencaoEquipamento);
-            
-            // Logout
-            document.getElementById('btnLogout').addEventListener('click', handleLogout);
-
-            // Carregar dados iniciais
-            document.getElementById('userName').textContent = currentUser.nome;
+        // Carregar dados ao iniciar
+        window.addEventListener('DOMContentLoaded', function() {
             loadUsuarios();
             loadManutencoesPrediais();
             loadManutencoesEquipamentos();
@@ -598,7 +560,7 @@
             document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
             
-            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+            event.target.closest('.menu-item').classList.add('active');
             document.getElementById(section).classList.add('active');
         }
 
@@ -610,8 +572,8 @@
         }
 
         // Cadastrar usuário
-        async function handleCadastroUsuario(e) {
-            e.preventDefault();
+        async function handleCadastroUsuario(event) {
+            event.preventDefault();
             
             const nome = document.getElementById('usuarioNome').value.trim();
             const usuario = document.getElementById('usuarioLogin').value.trim();
@@ -629,16 +591,12 @@
             }
 
             try {
-                // Verificar se o usuário já existe
-                const { data: existing, error: checkError } = await supabase
+                // Verificar se usuário já existe
+                const { data: existing } = await supabase
                     .from('usuarios')
                     .select('usuario')
                     .eq('usuario', usuario)
                     .maybeSingle();
-
-                if (checkError && checkError.code !== 'PGRST116') {
-                    throw checkError;
-                }
 
                 if (existing) {
                     showAlert('alertUsuarios', 'Este nome de usuário já está em uso!', 'error');
@@ -646,27 +604,24 @@
                 }
 
                 // Inserir novo usuário
-                const { error } = await supabase
+                const { data, error } = await supabase
                     .from('usuarios')
-                    .insert([{ nome, usuario, senha, perfil }]);
+                    .insert([{ nome, usuario, senha, perfil }])
+                    .select();
 
                 if (error) {
-                    console.error('Erro detalhado:', error);
-                    if (error.code === '23505') {
-                        showAlert('alertUsuarios', 'Este usuário já existe!', 'error');
-                    } else {
-                        showAlert('alertUsuarios', 'Erro ao cadastrar: ' + error.message, 'error');
-                    }
+                    console.error('Erro:', error);
+                    showAlert('alertUsuarios', 'Erro ao cadastrar: ' + error.message, 'error');
                     return;
                 }
 
                 showAlert('alertUsuarios', 'Usuário cadastrado com sucesso!', 'success');
-                document.getElementById('formUsuario').reset();
+                event.target.reset();
                 loadUsuarios();
 
             } catch (error) {
-                console.error('Erro completo:', error);
-                showAlert('alertUsuarios', 'Erro ao cadastrar usuário: ' + (error.message || 'Erro desconhecido'), 'error');
+                console.error('Erro:', error);
+                showAlert('alertUsuarios', 'Erro ao cadastrar usuário: ' + error.message, 'error');
             }
         }
 
@@ -682,7 +637,7 @@
 
                 const lista = document.getElementById('listaUsuarios');
                 
-                if (data.length === 0) {
+                if (!data || data.length === 0) {
                     lista.innerHTML = '<p class="loading">Nenhum usuário cadastrado.</p>';
                     return;
                 }
@@ -706,7 +661,7 @@
                         <tr>
                             <td>${user.nome}</td>
                             <td>@${user.usuario}</td>
-                            <td><span class="badge badge-${user.perfil || 'usuario'}">${user.perfil || 'Usuário'}</span></td>
+                            <td><span class="badge badge-${user.perfil}">${user.perfil}</span></td>
                             <td>${date}</td>
                         </tr>
                     `;
@@ -716,13 +671,15 @@
                 lista.innerHTML = html;
 
             } catch (error) {
-                console.error('Erro:', error);
+                console.error('Erro ao carregar usuários:', error);
+                document.getElementById('listaUsuarios').innerHTML = 
+                    '<p class="loading">Erro ao carregar usuários.</p>';
             }
         }
 
         // Registrar manutenção predial
-        async function handleManutencaoPredial(e) {
-            e.preventDefault();
+        async function handleManutencaoPredial(event) {
+            event.preventDefault();
             
             const local = document.getElementById('predialLocal').value.trim();
             const tipo = document.getElementById('predialTipo').value;
@@ -745,12 +702,12 @@
                 if (error) throw error;
 
                 showAlert('alertPredial', 'Manutenção registrada com sucesso!', 'success');
-                document.getElementById('formPredial').reset();
+                event.target.reset();
                 loadManutencoesPrediais();
 
             } catch (error) {
                 console.error('Erro:', error);
-                showAlert('alertPredial', 'Erro ao registrar manutenção.', 'error');
+                showAlert('alertPredial', 'Erro ao registrar manutenção: ' + error.message, 'error');
             }
         }
 
@@ -766,7 +723,7 @@
 
                 const lista = document.getElementById('listaPredial');
                 
-                if (data.length === 0) {
+                if (!data || data.length === 0) {
                     lista.innerHTML = '<p class="loading">Nenhuma manutenção registrada.</p>';
                     return;
                 }
@@ -803,12 +760,14 @@
 
             } catch (error) {
                 console.error('Erro:', error);
+                document.getElementById('listaPredial').innerHTML = 
+                    '<p class="loading">Erro ao carregar manutenções.</p>';
             }
         }
 
         // Registrar manutenção de equipamento
-        async function handleManutencaoEquipamento(e) {
-            e.preventDefault();
+        async function handleManutencaoEquipamento(event) {
+            event.preventDefault();
             
             const nome = document.getElementById('equipNome').value.trim();
             const patrimonio = document.getElementById('equipPatrimonio').value.trim();
@@ -834,12 +793,12 @@
                 if (error) throw error;
 
                 showAlert('alertEquipamentos', 'Manutenção registrada com sucesso!', 'success');
-                document.getElementById('formEquipamento').reset();
+                event.target.reset();
                 loadManutencoesEquipamentos();
 
             } catch (error) {
                 console.error('Erro:', error);
-                showAlert('alertEquipamentos', 'Erro ao registrar manutenção.', 'error');
+                showAlert('alertEquipamentos', 'Erro ao registrar manutenção: ' + error.message, 'error');
             }
         }
 
@@ -855,7 +814,7 @@
 
                 const lista = document.getElementById('listaEquipamentos');
                 
-                if (data.length === 0) {
+                if (!data || data.length === 0) {
                     lista.innerHTML = '<p class="loading">Nenhuma manutenção registrada.</p>';
                     return;
                 }
@@ -894,6 +853,8 @@
 
             } catch (error) {
                 console.error('Erro:', error);
+                document.getElementById('listaEquipamentos').innerHTML = 
+                    '<p class="loading">Erro ao carregar manutenções.</p>';
             }
         }
 
