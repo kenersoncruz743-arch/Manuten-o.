@@ -557,7 +557,15 @@
         const SUPABASE_URL = 'https://wcfrwsgnxochxvwhxnvy.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjZnJ3c2dueG9jaHh2d2h4bnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzExMDgsImV4cCI6MjA4MzIwNzEwOH0.Yb4cT5chXp3S8NZaWbLpv436HzxGCO7CZTruPpOPDdU';
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Inicializar Supabase (evitar redeclaração)
+        let supabase;
+        if (typeof window.supabaseClient === 'undefined') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            window.supabaseClient = supabase;
+        } else {
+            supabase = window.supabaseClient;
+        }
+        
         let currentUser = { nome: 'Administrador', usuario: 'admin' };
 
         // Inicializar
@@ -615,20 +623,50 @@
                 return;
             }
 
+            if (senha.length < 6) {
+                showAlert('alertUsuarios', 'A senha deve ter pelo menos 6 caracteres!', 'error');
+                return;
+            }
+
             try {
+                // Verificar se o usuário já existe
+                const { data: existing, error: checkError } = await supabase
+                    .from('usuarios')
+                    .select('usuario')
+                    .eq('usuario', usuario)
+                    .maybeSingle();
+
+                if (checkError && checkError.code !== 'PGRST116') {
+                    throw checkError;
+                }
+
+                if (existing) {
+                    showAlert('alertUsuarios', 'Este nome de usuário já está em uso!', 'error');
+                    return;
+                }
+
+                // Inserir novo usuário
                 const { error } = await supabase
                     .from('usuarios')
                     .insert([{ nome, usuario, senha, perfil }]);
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Erro detalhado:', error);
+                    if (error.code === '23505') {
+                        showAlert('alertUsuarios', 'Este usuário já existe!', 'error');
+                    } else {
+                        showAlert('alertUsuarios', 'Erro ao cadastrar: ' + error.message, 'error');
+                    }
+                    return;
+                }
 
                 showAlert('alertUsuarios', 'Usuário cadastrado com sucesso!', 'success');
                 document.getElementById('formUsuario').reset();
                 loadUsuarios();
 
             } catch (error) {
-                console.error('Erro:', error);
-                showAlert('alertUsuarios', 'Erro ao cadastrar usuário.', 'error');
+                console.error('Erro completo:', error);
+                showAlert('alertUsuarios', 'Erro ao cadastrar usuário: ' + (error.message || 'Erro desconhecido'), 'error');
             }
         }
 
