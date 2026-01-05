@@ -8,6 +8,11 @@ async function handleManutencaoPredial(event) {
     const data_prevista = document.getElementById('predialData').value;
     const descricao = document.getElementById('predialDescricao').value.trim();
 
+    if (!local || !tipo || !prioridade || !data_prevista || !descricao) {
+        showAlert('alertPredial', 'Preencha todos os campos!', 'error');
+        return;
+    }
+
     try {
         const { error } = await db
             .from('manutencao_predial')
@@ -23,7 +28,7 @@ async function handleManutencaoPredial(event) {
         if (error) throw error;
 
         showAlert('alertPredial', 'Manutenção registrada com sucesso!', 'success');
-        event.target.reset();
+        document.getElementById('formPredial').reset();
         loadManutencoesPrediais();
 
     } catch (error) {
@@ -98,6 +103,11 @@ async function handleManutencaoEquipamento(event) {
     const responsavel = document.getElementById('equipResponsavel').value.trim();
     const observacoes = document.getElementById('equipObservacoes').value.trim();
 
+    if (!nome || !tipo || !status || !data_manutencao || !observacoes) {
+        showAlert('alertEquipamentos', 'Preencha todos os campos obrigatórios!', 'error');
+        return;
+    }
+
     try {
         const { error } = await db
             .from('manutencao_equipamentos')
@@ -114,7 +124,7 @@ async function handleManutencaoEquipamento(event) {
         if (error) throw error;
 
         showAlert('alertEquipamentos', 'Manutenção registrada com sucesso!', 'success');
-        event.target.reset();
+        document.getElementById('formEquipamento').reset();
         loadManutencoesEquipamentos();
 
     } catch (error) {
@@ -177,13 +187,4 @@ async function loadManutencoesEquipamentos() {
         document.getElementById('listaEquipamentos').innerHTML = 
             '<p class="loading">Erro ao carregar manutenções.</p>';
     }
-}
-
-// Trocar seção ativa
-function showSection(section) {
-    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-    document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
-    
-    event.target.closest('.menu-item').classList.add('active');
-    document.getElementById(section).classList.add('active');
 }
