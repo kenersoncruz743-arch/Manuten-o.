@@ -5,6 +5,7 @@ const SUPABASE_URL = 'https://wcfrwsgnxochxvwhxnvy.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjZnJ3c2dueG9jaHh2d2h4bnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzExMDgsImV4cCI6MjA4MzIwNzEwOH0.Yb4cT5chXp3S8NZaWbLpv436HzxGCO7CZTruPpOPDdU';
 
 let db;
+let currentUser = null;
 
 function initSupabase() {
     if (typeof window.supabase === 'undefined') {
@@ -27,10 +28,12 @@ function checkSession() {
 
 function saveSession(user) {
     localStorage.setItem('currentUser', JSON.stringify(user));
+    currentUser = user;
 }
 
 function clearSession() {
     localStorage.removeItem('currentUser');
+    currentUser = null;
 }
 
 function protectPage() {
@@ -39,7 +42,17 @@ function protectPage() {
         window.location.href = 'login.html';
         return null;
     }
+    currentUser = user;
     return user;
+}
+
+// ========================================
+// VERIFICAÇÃO DE PERMISSÕES
+// ========================================
+function hasPermission(permission) {
+    if (!currentUser) return false;
+    if (currentUser.perfil === 'admin') return true;
+    return currentUser[permission] === true;
 }
 
 // ========================================
@@ -51,6 +64,26 @@ function showAlert(elementId, message, type) {
         alertBox.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
         setTimeout(() => alertBox.innerHTML = '', 5000);
     }
+}
+
+// ========================================
+// FUNÇÕES DE MODAL
+// ========================================
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+// ========================================
+// GERADOR DE CÓDIGO ALFANUMÉRICO
+// ========================================
+function generateCode(prefix) {
+    const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    return `${prefix}-${date}-${random}`;
 }
 
 // ========================================
@@ -77,6 +110,7 @@ async function handleLogin(event) {
             .select('*')
             .eq('usuario', usuario)
             .eq('senha', senha)
+            .eq('ativo', true)
             .maybeSingle();
 
         if (error) throw error;
@@ -112,6 +146,11 @@ function handleLogout() {
 async function handleCadastroUsuario(event) {
     event.preventDefault();
     
+    if (!hasPermission('perm_usuarios_criar')) {
+        showAlert('alertUsuarios', 'Você não tem permissão para criar usuários!', 'error');
+        return;
+    }
+
     const nome = document.getElementById('usuarioNome').value.trim();
     const usuario = document.getElementById('usuarioLogin').value.trim();
     const senha = document.getElementById('usuarioSenha').value;
@@ -139,9 +178,12 @@ async function handleCadastroUsuario(event) {
             return;
         }
 
+        // Definir permissões padrão baseadas no perfil
+        const permissoes = getDefaultPermissions(perfil);
+
         const { error } = await db
             .from('usuarios')
-            .insert([{ nome, usuario, senha, perfil }]);
+            .insert([{ nome, usuario, senha, perfil, ...permissoes }]);
 
         if (error) throw error;
 
@@ -155,7 +197,59 @@ async function handleCadastroUsuario(event) {
     }
 }
 
+function getDefaultPermissions(perfil) {
+    if (perfil === 'admin') {
+        return {
+            perm_usuarios_visualizar: true,
+            perm_usuarios_criar: true,
+            perm_usuarios_editar: true,
+            perm_usuarios_excluir: true,
+            perm_usuarios_permissoes: true,
+            perm_predial_visualizar: true,
+            perm_predial_criar: true,
+            perm_predial_editar: true,
+            perm_equipamentos_visualizar: true,
+            perm_equipamentos_criar: true,
+            perm_equipamentos_editar: true
+        };
+    } else if (perfil === 'tecnico') {
+        return {
+            perm_usuarios_visualizar: false,
+            perm_usuarios_criar: false,
+            perm_usuarios_editar: false,
+            perm_usuarios_excluir: false,
+            perm_usuarios_permissoes: false,
+            perm_predial_visualizar: true,
+            perm_predial_criar: true,
+            perm_predial_editar: true,
+            perm_equipamentos_visualizar: true,
+            perm_equipamentos_criar: true,
+            perm_equipamentos_editar: true
+        };
+    } else {
+        return {
+            perm_usuarios_visualizar: false,
+            perm_usuarios_criar: false,
+            perm_usuarios_editar: false,
+            perm_usuarios_excluir: false,
+            perm_usuarios_permissoes: false,
+            perm_predial_visualizar: true,
+            perm_predial_criar: false,
+            perm_predial_editar: false,
+            perm_equipamentos_visualizar: true,
+            perm_equipamentos_criar: false,
+            perm_equipamentos_editar: false
+        };
+    }
+}
+
 async function loadUsuarios() {
+    if (!hasPermission('perm_usuarios_visualizar')) {
+        document.getElementById('listaUsuarios').innerHTML = 
+            '<p class="loading">Você não tem permissão para visualizar usuários.</p>';
+        return;
+    }
+
     try {
         const { data, error } = await db
             .from('usuarios')
@@ -178,7 +272,9 @@ async function loadUsuarios() {
                         <th>Nome</th>
                         <th>Usuário</th>
                         <th>Perfil</th>
+                        <th>Status</th>
                         <th>Cadastro</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -186,12 +282,29 @@ async function loadUsuarios() {
 
         data.forEach(user => {
             const date = new Date(user.created_at).toLocaleDateString('pt-BR');
+            const statusBadge = user.ativo ? 
+                '<span class="badge badge-concluido">Ativo</span>' : 
+                '<span class="badge badge-cancelado">Inativo</span>';
+            
+            let actions = '';
+            if (hasPermission('perm_usuarios_editar')) {
+                actions += `<button class="btn btn-small btn-secondary" onclick="editarUsuario(${user.id})">Editar</button>`;
+            }
+            if (hasPermission('perm_usuarios_permissoes')) {
+                actions += `<button class="btn btn-small btn-warning" onclick="editarPermissoes(${user.id})">Permissões</button>`;
+            }
+            if (hasPermission('perm_usuarios_excluir') && user.id !== currentUser.id) {
+                actions += `<button class="btn btn-small btn-danger" onclick="excluirUsuario(${user.id})">Excluir</button>`;
+            }
+
             html += `
                 <tr>
                     <td>${user.nome}</td>
                     <td>@${user.usuario}</td>
                     <td><span class="badge badge-${user.perfil}">${user.perfil}</span></td>
+                    <td>${statusBadge}</td>
                     <td>${date}</td>
+                    <td><div class="action-buttons">${actions}</div></td>
                 </tr>
             `;
         });
@@ -201,19 +314,198 @@ async function loadUsuarios() {
 
     } catch (error) {
         console.error('Erro:', error);
-        const lista = document.getElementById('listaUsuarios');
-        if (lista) {
-            lista.innerHTML = '<p class="loading">Erro ao carregar usuários.</p>';
+        document.getElementById('listaUsuarios').innerHTML = 
+            '<p class="loading">Erro ao carregar usuários.</p>';
+    }
+}
+
+async function editarUsuario(userId) {
+    try {
+        const { data, error } = await db
+            .from('usuarios')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (error) throw error;
+
+        document.getElementById('editUsuarioId').value = data.id;
+        document.getElementById('editUsuarioNome').value = data.nome;
+        document.getElementById('editUsuarioLogin').value = data.usuario;
+        document.getElementById('editUsuarioPerfil').value = data.perfil;
+        document.getElementById('editUsuarioAtivo').checked = data.ativo;
+
+        openModal('modalEditarUsuario');
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('alertUsuarios', 'Erro ao carregar dados do usuário.', 'error');
+    }
+}
+
+async function salvarEdicaoUsuario(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('editUsuarioId').value;
+    const nome = document.getElementById('editUsuarioNome').value.trim();
+    const usuario = document.getElementById('editUsuarioLogin').value.trim();
+    const perfil = document.getElementById('editUsuarioPerfil').value;
+    const senha = document.getElementById('editUsuarioSenha').value;
+    const ativo = document.getElementById('editUsuarioAtivo').checked;
+
+    if (!nome || !usuario || !perfil) {
+        showAlert('alertEditUsuario', 'Preencha todos os campos obrigatórios!', 'error');
+        return;
+    }
+
+    try {
+        const updateData = { nome, usuario, perfil, ativo };
+        
+        if (senha && senha.length >= 6) {
+            updateData.senha = senha;
+        } else if (senha && senha.length < 6) {
+            showAlert('alertEditUsuario', 'A senha deve ter pelo menos 6 caracteres!', 'error');
+            return;
         }
+
+        const { error } = await db
+            .from('usuarios')
+            .update(updateData)
+            .eq('id', id);
+
+        if (error) throw error;
+
+        showAlert('alertUsuarios', 'Usuário atualizado com sucesso!', 'success');
+        closeModal('modalEditarUsuario');
+        loadUsuarios();
+
+        // Se editou o próprio usuário, atualizar sessão
+        if (parseInt(id) === currentUser.id) {
+            const { data } = await db
+                .from('usuarios')
+                .select('*')
+                .eq('id', id)
+                .single();
+            if (data) saveSession(data);
+        }
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('alertEditUsuario', 'Erro ao atualizar usuário: ' + error.message, 'error');
+    }
+}
+
+async function editarPermissoes(userId) {
+    try {
+        const { data, error } = await db
+            .from('usuarios')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (error) throw error;
+
+        document.getElementById('permUsuarioId').value = data.id;
+        document.getElementById('permUsuarioNome').textContent = data.nome;
+        
+        // Marcar checkboxes das permissões
+        document.getElementById('permUsuariosVisualizar').checked = data.perm_usuarios_visualizar;
+        document.getElementById('permUsuariosCriar').checked = data.perm_usuarios_criar;
+        document.getElementById('permUsuariosEditar').checked = data.perm_usuarios_editar;
+        document.getElementById('permUsuariosExcluir').checked = data.perm_usuarios_excluir;
+        document.getElementById('permUsuariosPermissoes').checked = data.perm_usuarios_permissoes;
+        document.getElementById('permPredialVisualizar').checked = data.perm_predial_visualizar;
+        document.getElementById('permPredialCriar').checked = data.perm_predial_criar;
+        document.getElementById('permPredialEditar').checked = data.perm_predial_editar;
+        document.getElementById('permEquipamentosVisualizar').checked = data.perm_equipamentos_visualizar;
+        document.getElementById('permEquipamentosCriar').checked = data.perm_equipamentos_criar;
+        document.getElementById('permEquipamentosEditar').checked = data.perm_equipamentos_editar;
+
+        openModal('modalPermissoes');
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('alertUsuarios', 'Erro ao carregar permissões.', 'error');
+    }
+}
+
+async function salvarPermissoes(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('permUsuarioId').value;
+
+    const permissoes = {
+        perm_usuarios_visualizar: document.getElementById('permUsuariosVisualizar').checked,
+        perm_usuarios_criar: document.getElementById('permUsuariosCriar').checked,
+        perm_usuarios_editar: document.getElementById('permUsuariosEditar').checked,
+        perm_usuarios_excluir: document.getElementById('permUsuariosExcluir').checked,
+        perm_usuarios_permissoes: document.getElementById('permUsuariosPermissoes').checked,
+        perm_predial_visualizar: document.getElementById('permPredialVisualizar').checked,
+        perm_predial_criar: document.getElementById('permPredialCriar').checked,
+        perm_predial_editar: document.getElementById('permPredialEditar').checked,
+        perm_equipamentos_visualizar: document.getElementById('permEquipamentosVisualizar').checked,
+        perm_equipamentos_criar: document.getElementById('permEquipamentosCriar').checked,
+        perm_equipamentos_editar: document.getElementById('permEquipamentosEditar').checked
+    };
+
+    try {
+        const { error } = await db
+            .from('usuarios')
+            .update(permissoes)
+            .eq('id', id);
+
+        if (error) throw error;
+
+        showAlert('alertUsuarios', 'Permissões atualizadas com sucesso!', 'success');
+        closeModal('modalPermissoes');
+        loadUsuarios();
+
+        // Se editou o próprio usuário, atualizar sessão
+        if (parseInt(id) === currentUser.id) {
+            const { data } = await db
+                .from('usuarios')
+                .select('*')
+                .eq('id', id)
+                .single();
+            if (data) saveSession(data);
+        }
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('alertUsuarios', 'Erro ao atualizar permissões: ' + error.message, 'error');
+    }
+}
+
+async function excluirUsuario(userId) {
+    if (!confirm('Tem certeza que deseja excluir este usuário?')) return;
+
+    try {
+        const { error } = await db
+            .from('usuarios')
+            .delete()
+            .eq('id', userId);
+
+        if (error) throw error;
+
+        showAlert('alertUsuarios', 'Usuário excluído com sucesso!', 'success');
+        loadUsuarios();
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('alertUsuarios', 'Erro ao excluir usuário: ' + error.message, 'error');
     }
 }
 
 // ========================================
 // MANUTENÇÃO PREDIAL
 // ========================================
+let selectedImagesPredial = [];
+
 async function handleManutencaoPredial(event) {
     event.preventDefault();
     
+    if (!hasPermission('perm_predial_criar')) {
+        showAlert('alertPredial', 'Você não tem permissão para criar manutenções!', 'error');
+        return;
+    }
+
     const local = document.getElementById('predialLocal').value.trim();
     const tipo = document.getElementById('predialTipo').value;
     const prioridade = document.getElementById('predialPrioridade').value;
@@ -226,21 +518,28 @@ async function handleManutencaoPredial(event) {
     }
 
     try {
+        const codigo = generateCode('MP');
+        
         const { error } = await db
             .from('manutencao_predial')
             .insert([{ 
+                codigo,
                 local, 
                 tipo, 
                 prioridade, 
                 data_prevista, 
                 descricao,
-                status: 'pendente'
+                status: 'pendente',
+                criado_por: currentUser.nome,
+                imagens: selectedImagesPredial
             }]);
 
         if (error) throw error;
 
-        showAlert('alertPredial', 'Manutenção registrada com sucesso!', 'success');
+        showAlert('alertPredial', `Manutenção registrada com sucesso! Código: ${codigo}`, 'success');
         document.getElementById('formPredial').reset();
+        selectedImagesPredial = [];
+        updateImagePreview('predialImagePreview', selectedImagesPredial);
         loadManutencoesPrediais();
 
     } catch (error) {
@@ -250,6 +549,12 @@ async function handleManutencaoPredial(event) {
 }
 
 async function loadManutencoesPrediais() {
+    if (!hasPermission('perm_predial_visualizar')) {
+        document.getElementById('listaPredial').innerHTML = 
+            '<p class="loading">Você não tem permissão para visualizar manutenções.</p>';
+        return;
+    }
+
     try {
         const { data, error } = await db
             .from('manutencao_predial')
@@ -269,11 +574,13 @@ async function loadManutencoesPrediais() {
             <table>
                 <thead>
                     <tr>
+                        <th>Código</th>
                         <th>Local</th>
                         <th>Tipo</th>
                         <th>Prioridade</th>
                         <th>Status</th>
                         <th>Data Prevista</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -281,13 +588,22 @@ async function loadManutencoesPrediais() {
 
         data.forEach(item => {
             const date = new Date(item.data_prevista).toLocaleDateString('pt-BR');
+            
+            let actions = `<button class="btn btn-small btn-secondary" onclick="visualizarManutencaoPredial(${item.id})">Ver</button>`;
+            
+            if (hasPermission('perm_predial_editar')) {
+                actions += `<button class="btn btn-small btn-warning" onclick="editarManutencaoPredial(${item.id})">Editar</button>`;
+            }
+
             html += `
                 <tr>
+                    <td><span class="codigo-badge">${item.codigo}</span></td>
                     <td>${item.local}</td>
                     <td>${item.tipo}</td>
                     <td><span class="badge badge-${item.prioridade}">${item.prioridade}</span></td>
                     <td><span class="badge badge-${item.status}">${item.status}</span></td>
                     <td>${date}</td>
+                    <td><div class="action-buttons">${actions}</div></td>
                 </tr>
             `;
         });
@@ -297,19 +613,215 @@ async function loadManutencoesPrediais() {
 
     } catch (error) {
         console.error('Erro:', error);
-        const lista = document.getElementById('listaPredial');
-        if (lista) {
-            lista.innerHTML = '<p class="loading">Erro ao carregar manutenções.</p>';
+        document.getElementById('listaPredial').innerHTML = 
+            '<p class="loading">Erro ao carregar manutenções.</p>';
+    }
+}
+
+async function visualizarManutencaoPredial(id) {
+    try {
+        const { data, error } = await db
+            .from('manutencao_predial')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+
+        const dataPrevista = new Date(data.data_prevista).toLocaleDateString('pt-BR');
+        const dataConclusao = data.data_conclusao ? 
+            new Date(data.data_conclusao).toLocaleDateString('pt-BR') : '-';
+
+        let html = `
+            <div class="form-group">
+                <label>Código de Rastreamento:</label>
+                <p><span class="codigo-badge">${data.codigo}</span></p>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Local:</label>
+                    <p>${data.local}</p>
+                </div>
+                <div class="form-group">
+                    <label>Tipo:</label>
+                    <p>${data.tipo}</p>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Prioridade:</label>
+                    <p><span class="badge badge-${data.prioridade}">${data.prioridade}</span></p>
+                </div>
+                <div class="form-group">
+                    <label>Status:</label>
+                    <p><span class="badge badge-${data.status}">${data.status}</span></p>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Data Prevista:</label>
+                    <p>${dataPrevista}</p>
+                </div>
+                <div class="form-group">
+                    <label>Data Conclusão:</label>
+                    <p>${dataConclusao}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Descrição:</label>
+                <p>${data.descricao}</p>
+            </div>
+        `;
+
+        if (data.observacoes_conclusao) {
+            html += `
+                <div class="form-group">
+                    <label>Observações de Conclusão:</label>
+                    <p>${data.observacoes_conclusao}</p>
+                </div>
+            `;
         }
+
+        if (data.imagens && data.imagens.length > 0) {
+            html += `
+                <div class="form-group">
+                    <label>Imagens:</label>
+                    <div class="image-preview">
+            `;
+            data.imagens.forEach(img => {
+                html += `
+                    <div class="image-preview-item">
+                        <img src="${img}" alt="Imagem da manutenção">
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+        }
+
+        html += `
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Criado por:</label>
+                    <p>${data.criado_por || '-'}</p>
+                </div>
+                <div class="form-group">
+                    <label>Concluído por:</label>
+                    <p>${data.concluido_por || '-'}</p>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('viewPredialContent').innerHTML = html;
+        openModal('modalViewPredial');
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('alertPredial', 'Erro ao carregar dados.', 'error');
+    }
+}
+
+let editImagesPredial = [];
+
+async function editarManutencaoPredial(id) {
+    try {
+        const { data, error } = await db
+            .from('manutencao_predial')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+
+        document.getElementById('editPredialId').value = data.id;
+        document.getElementById('editPredialCodigo').textContent = data.codigo;
+        document.getElementById('editPredialLocal').value = data.local;
+        document.getElementById('editPredialTipo').value = data.tipo;
+        document.getElementById('editPredialPrioridade').value = data.prioridade;
+        document.getElementById('editPredialStatus').value = data.status;
+        document.getElementById('editPredialDataPrevista').value = data.data_prevista;
+        document.getElementById('editPredialDataConclusao').value = data.data_conclusao || '';
+        document.getElementById('editPredialDescricao').value = data.descricao;
+        document.getElementById('editPredialObsConclusao').value = data.observacoes_conclusao || '';
+        
+        editImagesPredial = data.imagens || [];
+        updateImagePreview('editPredialImagePreview', editImagesPredial);
+
+        openModal('modalEditarPredial');
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('alertPredial', 'Erro ao carregar dados.', 'error');
+    }
+}
+
+async function salvarEdicaoPredial(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('editPredialId').value;
+    const local = document.getElementById('editPredialLocal').value.trim();
+    const tipo = document.getElementById('editPredialTipo').value;
+    const prioridade = document.getElementById('editPredialPrioridade').value;
+    const status = document.getElementById('editPredialStatus').value;
+    const data_prevista = document.getElementById('editPredialDataPrevista').value;
+    const data_conclusao = document.getElementById('editPredialDataConclusao').value || null;
+    const descricao = document.getElementById('editPredialDescricao').value.trim();
+    const observacoes_conclusao = document.getElementById('editPredialObsConclusao').value.trim();
+
+    if (!local || !tipo || !prioridade || !status || !data_prevista || !descricao) {
+        showAlert('alertEditPredial', 'Preencha todos os campos obrigatórios!', 'error');
+        return;
+    }
+
+    try {
+        const updateData = {
+            local,
+            tipo,
+            prioridade,
+            status,
+            data_prevista,
+            data_conclusao,
+            descricao,
+            observacoes_conclusao,
+            imagens: editImagesPredial
+        };
+
+        if (status === 'concluido' && !data_conclusao) {
+            updateData.data_conclusao = new Date().toISOString().split('T')[0];
+        }
+
+        if (status === 'concluido' && !updateData.concluido_por) {
+            updateData.concluido_por = currentUser.nome;
+        }
+
+        const { error } = await db
+            .from('manutencao_predial')
+            .update(updateData)
+            .eq('id', id);
+
+        if (error) throw error;
+
+        showAlert('alertPredial', 'Manutenção atualizada com sucesso!', 'success');
+        closeModal('modalEditarPredial');
+        loadManutencoesPrediais();
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('alertEditPredial', 'Erro ao atualizar: ' + error.message, 'error');
     }
 }
 
 // ========================================
 // MANUTENÇÃO DE EQUIPAMENTOS
 // ========================================
+let selectedImagesEquip = [];
+
 async function handleManutencaoEquipamento(event) {
     event.preventDefault();
     
+    if (!hasPermission('perm_equipamentos_criar')) {
+        showAlert('alertEquipamentos', 'Você não tem permissão para criar manutenções!', 'error');
+        return;
+    }
+
     const nome = document.getElementById('equipNome').value.trim();
     const patrimonio = document.getElementById('equipPatrimonio').value.trim();
     const tipo = document.getElementById('equipTipo').value;
@@ -324,22 +836,29 @@ async function handleManutencaoEquipamento(event) {
     }
 
     try {
+        const codigo = generateCode('ME');
+
         const { error } = await db
             .from('manutencao_equipamentos')
             .insert([{ 
+                codigo,
                 equipamento: nome,
                 patrimonio,
                 tipo, 
                 status, 
                 data_manutencao, 
                 responsavel,
-                observacoes
+                observacoes,
+                criado_por: currentUser.nome,
+                imagens: selectedImagesEquip
             }]);
 
         if (error) throw error;
 
-        showAlert('alertEquipamentos', 'Manutenção registrada com sucesso!', 'success');
+        showAlert('alertEquipamentos', `Manutenção registrada com sucesso! Código: ${codigo}`, 'success');
         document.getElementById('formEquipamento').reset();
+        selectedImagesEquip = [];
+        updateImagePreview('equipImagePreview', selectedImagesEquip);
         loadManutencoesEquipamentos();
 
     } catch (error) {
@@ -349,6 +868,12 @@ async function handleManutencaoEquipamento(event) {
 }
 
 async function loadManutencoesEquipamentos() {
+    if (!hasPermission('perm_equipamentos_visualizar')) {
+        document.getElementById('listaEquipamentos').innerHTML = 
+            '<p class="loading">Você não tem permissão para visualizar manutenções.</p>';
+        return;
+    }
+
     try {
         const { data, error } = await db
             .from('manutencao_equipamentos')
@@ -368,12 +893,13 @@ async function loadManutencoesEquipamentos() {
             <table>
                 <thead>
                     <tr>
+                        <th>Código</th>
                         <th>Equipamento</th>
                         <th>Patrimônio</th>
                         <th>Tipo</th>
                         <th>Status</th>
                         <th>Data</th>
-                        <th>Responsável</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -381,14 +907,22 @@ async function loadManutencoesEquipamentos() {
 
         data.forEach(item => {
             const date = new Date(item.data_manutencao).toLocaleDateString('pt-BR');
+            
+            let actions = `<button class="btn btn-small btn-secondary" onclick="visualizarManutencaoEquip(${item.id})">Ver</button>`;
+            
+            if (hasPermission('perm_equipamentos_editar')) {
+                actions += `<button class="btn btn-small btn-warning" onclick="editarManutencaoEquip(${item.id})">Editar</button>`;
+            }
+
             html += `
                 <tr>
+                    <td><span class="codigo-badge">${item.codigo}</span></td>
                     <td>${item.equipamento}</td>
                     <td>${item.patrimonio || '-'}</td>
                     <td>${item.tipo}</td>
                     <td><span class="badge badge-${item.status}">${item.status}</span></td>
                     <td>${date}</td>
-                    <td>${item.responsavel || '-'}</td>
+                    <td><div class="action-buttons">${actions}</div></td>
                 </tr>
             `;
         });
@@ -398,10 +932,261 @@ async function loadManutencoesEquipamentos() {
 
     } catch (error) {
         console.error('Erro:', error);
-        const lista = document.getElementById('listaEquipamentos');
-        if (lista) {
-            lista.innerHTML = '<p class="loading">Erro ao carregar manutenções.</p>';
+        document.getElementById('listaEquipamentos').innerHTML = 
+            '<p class="loading">Erro ao carregar manutenções.</p>';
+    }
+}
+
+async function visualizarManutencaoEquip(id) {
+    try {
+        const { data, error } = await db
+            .from('manutencao_equipamentos')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+
+        const dataManutencao = new Date(data.data_manutencao).toLocaleDateString('pt-BR');
+        const dataConclusao = data.data_conclusao ? 
+            new Date(data.data_conclusao).toLocaleDateString('pt-BR') : '-';
+
+        let html = `
+            <div class="form-group">
+                <label>Código de Rastreamento:</label>
+                <p><span class="codigo-badge">${data.codigo}</span></p>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Equipamento:</label>
+                    <p>${data.equipamento}</p>
+                </div>
+                <div class="form-group">
+                    <label>Patrimônio:</label>
+                    <p>${data.patrimonio || '-'}</p>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Tipo:</label>
+                    <p>${data.tipo}</p>
+                </div>
+                <div class="form-group">
+                    <label>Status:</label>
+                    <p><span class="badge badge-${data.status}">${data.status}</span></p>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Data Manutenção:</label>
+                    <p>${dataManutencao}</p>
+                </div>
+                <div class="form-group">
+                    <label>Data Conclusão:</label>
+                    <p>${dataConclusao}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Responsável:</label>
+                <p>${data.responsavel || '-'}</p>
+            </div>
+            <div class="form-group">
+                <label>Observações:</label>
+                <p>${data.observacoes}</p>
+            </div>
+        `;
+
+        if (data.observacoes_conclusao) {
+            html += `
+                <div class="form-group">
+                    <label>Observações de Conclusão:</label>
+                    <p>${data.observacoes_conclusao}</p>
+                </div>
+            `;
         }
+
+        if (data.imagens && data.imagens.length > 0) {
+            html += `
+                <div class="form-group">
+                    <label>Imagens:</label>
+                    <div class="image-preview">
+            `;
+            data.imagens.forEach(img => {
+                html += `
+                    <div class="image-preview-item">
+                        <img src="${img}" alt="Imagem da manutenção">
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+        }
+
+        html += `
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Criado por:</label>
+                    <p>${data.criado_por || '-'}</p>
+                </div>
+                <div class="form-group">
+                    <label>Concluído por:</label>
+                    <p>${data.concluido_por || '-'}</p>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('viewEquipContent').innerHTML = html;
+        openModal('modalViewEquip');
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('alertEquipamentos', 'Erro ao carregar dados.', 'error');
+    }
+}
+
+let editImagesEquip = [];
+
+async function editarManutencaoEquip(id) {
+    try {
+        const { data, error } = await db
+            .from('manutencao_equipamentos')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+
+        document.getElementById('editEquipId').value = data.id;
+        document.getElementById('editEquipCodigo').textContent = data.codigo;
+        document.getElementById('editEquipNome').value = data.equipamento;
+        document.getElementById('editEquipPatrimonio').value = data.patrimonio || '';
+        document.getElementById('editEquipTipo').value = data.tipo;
+        document.getElementById('editEquipStatus').value = data.status;
+        document.getElementById('editEquipData').value = data.data_manutencao;
+        document.getElementById('editEquipDataConclusao').value = data.data_conclusao || '';
+        document.getElementById('editEquipResponsavel').value = data.responsavel || '';
+        document.getElementById('editEquipObservacoes').value = data.observacoes;
+        document.getElementById('editEquipObsConclusao').value = data.observacoes_conclusao || '';
+        
+        editImagesEquip = data.imagens || [];
+        updateImagePreview('editEquipImagePreview', editImagesEquip);
+
+        openModal('modalEditarEquip');
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('alertEquipamentos', 'Erro ao carregar dados.', 'error');
+    }
+}
+
+async function salvarEdicaoEquip(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('editEquipId').value;
+    const equipamento = document.getElementById('editEquipNome').value.trim();
+    const patrimonio = document.getElementById('editEquipPatrimonio').value.trim();
+    const tipo = document.getElementById('editEquipTipo').value;
+    const status = document.getElementById('editEquipStatus').value;
+    const data_manutencao = document.getElementById('editEquipData').value;
+    const data_conclusao = document.getElementById('editEquipDataConclusao').value || null;
+    const responsavel = document.getElementById('editEquipResponsavel').value.trim();
+    const observacoes = document.getElementById('editEquipObservacoes').value.trim();
+    const observacoes_conclusao = document.getElementById('editEquipObsConclusao').value.trim();
+
+    if (!equipamento || !tipo || !status || !data_manutencao || !observacoes) {
+        showAlert('alertEditEquip', 'Preencha todos os campos obrigatórios!', 'error');
+        return;
+    }
+
+    try {
+        const updateData = {
+            equipamento,
+            patrimonio,
+            tipo,
+            status,
+            data_manutencao,
+            data_conclusao,
+            responsavel,
+            observacoes,
+            observacoes_conclusao,
+            imagens: editImagesEquip
+        };
+
+        if (status === 'concluido' && !data_conclusao) {
+            updateData.data_conclusao = new Date().toISOString().split('T')[0];
+        }
+
+        if (status === 'concluido' && !updateData.concluido_por) {
+            updateData.concluido_por = currentUser.nome;
+        }
+
+        const { error } = await db
+            .from('manutencao_equipamentos')
+            .update(updateData)
+            .eq('id', id);
+
+        if (error) throw error;
+
+        showAlert('alertEquipamentos', 'Manutenção atualizada com sucesso!', 'success');
+        closeModal('modalEditarEquip');
+        loadManutencoesEquipamentos();
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('alertEditEquip', 'Erro ao atualizar: ' + error.message, 'error');
+    }
+}
+
+// ========================================
+// UPLOAD DE IMAGENS
+// ========================================
+function handleImageUpload(event, imageArray, previewId) {
+    const files = Array.from(event.target.files);
+    
+    files.forEach(file => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imageArray.push(e.target.result);
+                updateImagePreview(previewId, imageArray);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+function updateImagePreview(previewId, imageArray) {
+    const preview = document.getElementById(previewId);
+    if (!preview) return;
+
+    if (imageArray.length === 0) {
+        preview.innerHTML = '';
+        return;
+    }
+
+    let html = '';
+    imageArray.forEach((img, index) => {
+        html += `
+            <div class="image-preview-item">
+                <img src="${img}" alt="Imagem ${index + 1}">
+                <button type="button" class="image-remove" onclick="removeImage(${index}, '${previewId}')">×</button>
+            </div>
+        `;
+    });
+    preview.innerHTML = html;
+}
+
+function removeImage(index, previewId) {
+    if (previewId === 'predialImagePreview') {
+        selectedImagesPredial.splice(index, 1);
+        updateImagePreview(previewId, selectedImagesPredial);
+    } else if (previewId === 'equipImagePreview') {
+        selectedImagesEquip.splice(index, 1);
+        updateImagePreview(previewId, selectedImagesEquip);
+    } else if (previewId === 'editPredialImagePreview') {
+        editImagesPredial.splice(index, 1);
+        updateImagePreview(previewId, editImagesPredial);
+    } else if (previewId === 'editEquipImagePreview') {
+        editImagesEquip.splice(index, 1);
+        updateImagePreview(previewId, editImagesEquip);
     }
 }
 
