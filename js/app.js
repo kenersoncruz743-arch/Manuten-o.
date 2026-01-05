@@ -602,9 +602,9 @@ async function loadManutencoesPrediais() {
         data.forEach(item => {
             const date = new Date(item.data_prevista).toLocaleDateString('pt-BR');
             
-            let actions = `<button class="btn btn-small btn-secondary" onclick="visualizarManutencaoPredial(${item.id})">Ver</button>`;
+            let actions = `<button class="btn btn-small btn-secondary" onclick="abrirForumPredial(${item.id})">💬 Abrir</button>`;
             
-            if (hasPermission('perm_predial_editar')) {
+            if (hasPermission('perm_predial_editar') && (!item.bloqueado || currentUser.perfil === 'admin')) {
                 actions += `<button class="btn btn-small btn-warning" onclick="editarManutencaoPredial(${item.id})">Editar</button>`;
             }
 
@@ -802,12 +802,15 @@ async function salvarEdicaoPredial(event) {
             imagens: editImagesPredial
         };
 
-        if (status === 'concluido' && !data_conclusao) {
-            updateData.data_conclusao = new Date().toISOString().split('T')[0];
-        }
-
-        if (status === 'concluido' && !updateData.concluido_por) {
-            updateData.concluido_por = currentUser.nome;
+        if (status === 'concluido') {
+            if (!data_conclusao) {
+                updateData.data_conclusao = new Date().toISOString().split('T')[0];
+            }
+            if (!updateData.concluido_por) {
+                updateData.concluido_por = currentUser.nome;
+            }
+            // Bloquear automaticamente ao concluir
+            updateData.bloqueado = true;
         }
 
         const { error } = await db
@@ -930,9 +933,9 @@ async function loadManutencoesEquipamentos() {
         data.forEach(item => {
             const date = new Date(item.data_manutencao).toLocaleDateString('pt-BR');
             
-            let actions = `<button class="btn btn-small btn-secondary" onclick="visualizarManutencaoEquip(${item.id})">Ver</button>`;
+            let actions = `<button class="btn btn-small btn-secondary" onclick="abrirForumEquipamento(${item.id})">💬 Abrir</button>`;
             
-            if (hasPermission('perm_equipamentos_editar')) {
+            if (hasPermission('perm_equipamentos_editar') && (!item.bloqueado || currentUser.perfil === 'admin')) {
                 actions += `<button class="btn btn-small btn-warning" onclick="editarManutencaoEquip(${item.id})">Editar</button>`;
             }
 
@@ -1137,12 +1140,15 @@ async function salvarEdicaoEquip(event) {
             imagens: editImagesEquip
         };
 
-        if (status === 'concluido' && !data_conclusao) {
-            updateData.data_conclusao = new Date().toISOString().split('T')[0];
-        }
-
-        if (status === 'concluido' && !updateData.concluido_por) {
-            updateData.concluido_por = currentUser.nome;
+        if (status === 'concluido') {
+            if (!data_conclusao) {
+                updateData.data_conclusao = new Date().toISOString().split('T')[0];
+            }
+            if (!updateData.concluido_por) {
+                updateData.concluido_por = currentUser.nome;
+            }
+            // Bloquear automaticamente ao concluir
+            updateData.bloqueado = true;
         }
 
         const { error } = await db
