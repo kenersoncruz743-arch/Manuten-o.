@@ -26,6 +26,9 @@
                         <input type="password" id="loginSenha" placeholder="Digite sua senha" required>
                     </div>
                     <button type="button" class="btn-login" id="btnLogin">Entrar</button>
+                    <p style="margin-top: 20px; text-align: center; font-size: 12px; color: #666;">
+                        <strong>Usuário padrão:</strong> admin | <strong>Senha:</strong> admin123
+                    </p>
                 </div>
             </div>
         </div>
@@ -39,7 +42,6 @@
                 handleLogin(e);
             });
 
-            // Permitir login com Enter
             document.getElementById('loginSenha').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     handleLogin(e);
