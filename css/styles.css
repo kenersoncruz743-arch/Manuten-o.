@@ -105,13 +105,13 @@ body {
 
 .btn-logout:hover {
     background: white;
-    color: #667eea;
+    color: #0000CD;
 }
 
 .btn-login {
     width: 100%;
     padding: 15px;
-    background: linear-gradient(135deg, #667eea 0%, #ADD8E6 100%);
+    background: linear-gradient(135deg, #667eea 0%, #0000CD 100%);
     color: white;
     border: none;
     border-radius: 10px;
@@ -138,7 +138,7 @@ body {
 
 .btn {
     padding: 12px 24px;
-    background: linear-gradient(135deg, #667eea 0%, #ADD8E6 100%);
+    background: linear-gradient(135deg, #667eea 0%, #0000CD 100%);
     color: white;
     border: none;
     border-radius: 8px;
