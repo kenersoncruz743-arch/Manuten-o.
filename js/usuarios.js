@@ -43,7 +43,7 @@ async function handleCadastroUsuario(event) {
         }
 
         showAlert('alertUsuarios', 'Usuário cadastrado com sucesso!', 'success');
-        event.target.reset();
+        document.getElementById('formUsuario').reset();
         loadUsuarios();
 
     } catch (error) {
