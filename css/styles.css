@@ -216,6 +216,11 @@ body {
     border-left-color: #667eea;
 }
 
+/* Ocultar itens de menu sem permissão */
+.menu-item[style*="display: none"] {
+    display: none !important;
+}
+
 .menu-icon {
     font-size: 20px;
 }
