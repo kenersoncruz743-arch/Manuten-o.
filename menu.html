@@ -578,6 +578,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/comentarios.js"></script>
     <script src="js/app.js"></script>
     <script>
         // Proteger página e inicializar
@@ -640,5 +641,105 @@
             }
         });
     </script>
+    
+    <!-- Modais de Fórum -->
+    <!-- Modal: Fórum Manutenção Predial -->
+    <div id="modalForumPredial" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>💬 Fórum de Manutenção Predial</h2>
+                <button class="modal-close" onclick="closeModal('modalForumPredial')">×</button>
+            </div>
+
+            <!-- Detalhes da Manutenção -->
+            <div id="forumPredialContent"></div>
+
+            <!-- Seção de Comentários -->
+            <div class="comments-section">
+                <div class="comments-header">
+                    <h3>💬 Comentários</h3>
+                    <span class="comments-count" id="comentariosPredialCount">0</span>
+                </div>
+
+                <!-- Formulário de Novo Comentário -->
+                <div class="comment-form">
+                    <textarea id="comentarioPredialText" 
+                              placeholder="Adicione seu comentário, atualizações ou observações sobre esta manutenção..." 
+                              maxlength="1000"></textarea>
+                    
+                    <div id="comentarioPredialImagesPreview" class="comment-images-preview"></div>
+                    
+                    <div class="comment-form-footer">
+                        <label class="comment-attach-btn">
+                            📷 Anexar Fotos
+                            <input type="file" accept="image/*" multiple style="display: none;" 
+                                   onchange="handleCommentImageUpload(event, 'predial')">
+                        </label>
+                        <button class="btn" onclick="adicionarComentario('predial')">
+                            Enviar Comentário
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Comentários -->
+                <div class="comments-list" id="comentariosPredialList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Carregando comentários...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Fórum Manutenção de Equipamentos -->
+    <div id="modalForumEquipamento" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>💬 Fórum de Manutenção de Equipamento</h2>
+                <button class="modal-close" onclick="closeModal('modalForumEquipamento')">×</button>
+            </div>
+
+            <!-- Detalhes da Manutenção -->
+            <div id="forumEquipamentoContent"></div>
+
+            <!-- Seção de Comentários -->
+            <div class="comments-section">
+                <div class="comments-header">
+                    <h3>💬 Comentários</h3>
+                    <span class="comments-count" id="comentariosEquipamentoCount">0</span>
+                </div>
+
+                <!-- Formulário de Novo Comentário -->
+                <div class="comment-form">
+                    <textarea id="comentarioEquipamentoText" 
+                              placeholder="Adicione seu comentário, atualizações ou observações sobre esta manutenção..." 
+                              maxlength="1000"></textarea>
+                    
+                    <div id="comentarioEquipamentoImagesPreview" class="comment-images-preview"></div>
+                    
+                    <div class="comment-form-footer">
+                        <label class="comment-attach-btn">
+                            📷 Anexar Fotos
+                            <input type="file" accept="image/*" multiple style="display: none;" 
+                                   onchange="handleCommentImageUpload(event, 'equipamento')">
+                        </label>
+                        <button class="btn" onclick="adicionarComentario('equipamento')">
+                            Enviar Comentário
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Comentários -->
+                <div class="comments-list" id="comentariosEquipamentoList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Carregando comentários...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </body>
 </html>
