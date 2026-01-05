@@ -266,7 +266,11 @@ async function loadUsuarios() {
         }
 
         let html = `
-            <table>
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchUsuarios" placeholder="🔍 Buscar usuário por nome ou perfil...">
+            </div>
+            <div class="table-container">
+            <table id="tabelaUsuarios">
                 <thead>
                     <tr>
                         <th>Nome</th>
@@ -309,8 +313,13 @@ async function loadUsuarios() {
             `;
         });
 
-        html += '</tbody></table>';
+        html += '</tbody></table></div>';
         lista.innerHTML = html;
+
+        // Adicionar event listener para busca
+        document.getElementById('searchUsuarios').addEventListener('input', function(e) {
+            filterTable('tabelaUsuarios', e.target.value);
+        });
 
     } catch (error) {
         console.error('Erro:', error);
@@ -571,7 +580,11 @@ async function loadManutencoesPrediais() {
         }
 
         let html = `
-            <table>
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchPredial" placeholder="🔍 Buscar por código, local ou tipo...">
+            </div>
+            <div class="table-container">
+            <table id="tabelaPredial">
                 <thead>
                     <tr>
                         <th>Código</th>
@@ -579,7 +592,7 @@ async function loadManutencoesPrediais() {
                         <th>Tipo</th>
                         <th>Prioridade</th>
                         <th>Status</th>
-                        <th>Data Prevista</th>
+                        <th>Data</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -608,8 +621,13 @@ async function loadManutencoesPrediais() {
             `;
         });
 
-        html += '</tbody></table>';
+        html += '</tbody></table></div>';
         lista.innerHTML = html;
+
+        // Adicionar event listener para busca
+        document.getElementById('searchPredial').addEventListener('input', function(e) {
+            filterTable('tabelaPredial', e.target.value);
+        });
 
     } catch (error) {
         console.error('Erro:', error);
@@ -890,7 +908,11 @@ async function loadManutencoesEquipamentos() {
         }
 
         let html = `
-            <table>
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchEquipamentos" placeholder="🔍 Buscar por código, equipamento ou patrimônio...">
+            </div>
+            <div class="table-container">
+            <table id="tabelaEquipamentos">
                 <thead>
                     <tr>
                         <th>Código</th>
@@ -927,8 +949,13 @@ async function loadManutencoesEquipamentos() {
             `;
         });
 
-        html += '</tbody></table>';
+        html += '</tbody></table></div>';
         lista.innerHTML = html;
+
+        // Adicionar event listener para busca
+        document.getElementById('searchEquipamentos').addEventListener('input', function(e) {
+            filterTable('tabelaEquipamentos', e.target.value);
+        });
 
     } catch (error) {
         console.error('Erro:', error);
@@ -1203,6 +1230,50 @@ function showSection(section) {
     });
     
     document.getElementById(section).classList.add('active');
+}
+
+// ========================================
+// FUNÇÃO DE BUSCA/FILTRO
+// ========================================
+function filterTable(tableId, searchTerm) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    const term = searchTerm.toLowerCase().trim();
+    
+    let visibleCount = 0;
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const text = row.textContent.toLowerCase();
+        
+        if (text.includes(term)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    }
+    
+    // Mostrar mensagem se nenhum resultado for encontrado
+    const container = table.closest('.table-container') || table.parentElement;
+    let noResults = container.querySelector('.no-results-message');
+    
+    if (visibleCount === 0 && term !== '') {
+        if (!noResults) {
+            noResults = document.createElement('p');
+            noResults.className = 'no-results-message loading';
+            noResults.textContent = '🔍 Nenhum resultado encontrado para "' + searchTerm + '"';
+            container.appendChild(noResults);
+        }
+        table.style.display = 'none';
+    } else {
+        if (noResults) {
+            noResults.remove();
+        }
+        table.style.display = '';
+    }
 }
 
 // ========================================
