@@ -130,6 +130,12 @@
                             <label>Descrição do Problema *</label>
                             <textarea id="predialDescricao" placeholder="Descreva detalhadamente o problema..." required></textarea>
                         </div>
+                        <div class="form-group">
+                            <label>Adicionar Imagens</label>
+                            <input type="file" id="predialImages" accept="image/*" multiple 
+                                   onchange="handleImageUpload(event, selectedImagesPredial, 'predialImagePreview')">
+                            <div id="predialImagePreview" class="image-preview"></div>
+                        </div>
                         <button type="submit" class="btn">Registrar Manutenção</button>
                     </form>
                 </div>
@@ -196,6 +202,12 @@
                             <label>Observações *</label>
                             <textarea id="equipObservacoes" placeholder="Descreva o serviço realizado ou a ser realizado..." required></textarea>
                         </div>
+                        <div class="form-group">
+                            <label>Adicionar Imagens</label>
+                            <input type="file" id="equipImages" accept="image/*" multiple 
+                                   onchange="handleImageUpload(event, selectedImagesEquip, 'equipImagePreview')">
+                            <div id="equipImagePreview" class="image-preview"></div>
+                        </div>
                         <button type="submit" class="btn">Registrar Manutenção</button>
                     </form>
                 </div>
@@ -213,32 +225,368 @@
         </div>
     </div>
 
+    <!-- Modal: Editar Usuário -->
+    <div id="modalEditarUsuario" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Editar Usuário</h2>
+                <button class="modal-close" onclick="closeModal('modalEditarUsuario')">×</button>
+            </div>
+            <div id="alertEditUsuario"></div>
+            <form id="formEditUsuario">
+                <input type="hidden" id="editUsuarioId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome Completo *</label>
+                        <input type="text" id="editUsuarioNome" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Usuário *</label>
+                        <input type="text" id="editUsuarioLogin" required>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nova Senha (deixe em branco para manter)</label>
+                        <input type="password" id="editUsuarioSenha">
+                    </div>
+                    <div class="form-group">
+                        <label>Perfil *</label>
+                        <select id="editUsuarioPerfil" required>
+                            <option value="admin">Administrador</option>
+                            <option value="tecnico">Técnico</option>
+                            <option value="usuario">Usuário</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="editUsuarioAtivo">
+                        <label for="editUsuarioAtivo">Usuário Ativo</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalEditarUsuario')">Cancelar</button>
+                    <button type="submit" class="btn">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Editar Permissões -->
+    <div id="modalPermissoes" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔐 Gerenciar Permissões</h2>
+                <button class="modal-close" onclick="closeModal('modalPermissoes')">×</button>
+            </div>
+            <p><strong>Usuário:</strong> <span id="permUsuarioNome"></span></p>
+            <form id="formPermissoes">
+                <input type="hidden" id="permUsuarioId">
+                
+                <h3 style="margin-top: 20px;">Permissões de Usuários</h3>
+                <div class="permissions-grid">
+                    <div class="permission-item">
+                        <label>
+                            <input type="checkbox" id="permUsuariosVisualizar">
+                            Visualizar Usuários
+                        </label>
+                    </div>
+                    <div class="permission-item">
+                        <label>
+                            <input type="checkbox" id="permUsuariosCriar">
+                            Criar Usuários
+                        </label>
+                    </div>
+                    <div class="permission-item">
+                        <label>
+                            <input type="checkbox" id="permUsuariosEditar">
+                            Editar Usuários
+                        </label>
+                    </div>
+                    <div class="permission-item">
+                        <label>
+                            <input type="checkbox" id="permUsuariosExcluir">
+                            Excluir Usuários
+                        </label>
+                    </div>
+                    <div class="permission-item">
+                        <label>
+                            <input type="checkbox" id="permUsuariosPermissoes">
+                            Gerenciar Permissões
+                        </label>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">Permissões de Manutenção Predial</h3>
+                <div class="permissions-grid">
+                    <div class="permission-item">
+                        <label>
+                            <input type="checkbox" id="permPredialVisualizar">
+                            Visualizar Manutenções
+                        </label>
+                    </div>
+                    <div class="permission-item">
+                        <label>
+                            <input type="checkbox" id="permPredialCriar">
+                            Criar Manutenções
+                        </label>
+                    </div>
+                    <div class="permission-item">
+                        <label>
+                            <input type="checkbox" id="permPredialEditar">
+                            Editar Manutenções
+                        </label>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">Permissões de Manutenção de Equipamentos</h3>
+                <div class="permissions-grid">
+                    <div class="permission-item">
+                        <label>
+                            <input type="checkbox" id="permEquipamentosVisualizar">
+                            Visualizar Manutenções
+                        </label>
+                    </div>
+                    <div class="permission-item">
+                        <label>
+                            <input type="checkbox" id="permEquipamentosCriar">
+                            Criar Manutenções
+                        </label>
+                    </div>
+                    <div class="permission-item">
+                        <label>
+                            <input type="checkbox" id="permEquipamentosEditar">
+                            Editar Manutenções
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalPermissoes')">Cancelar</button>
+                    <button type="submit" class="btn">Salvar Permissões</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Visualizar Manutenção Predial -->
+    <div id="modalViewPredial" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🏢 Detalhes da Manutenção Predial</h2>
+                <button class="modal-close" onclick="closeModal('modalViewPredial')">×</button>
+            </div>
+            <div id="viewPredialContent"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalViewPredial')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Editar Manutenção Predial -->
+    <div id="modalEditarPredial" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Editar Manutenção Predial</h2>
+                <button class="modal-close" onclick="closeModal('modalEditarPredial')">×</button>
+            </div>
+            <div id="alertEditPredial"></div>
+            <form id="formEditPredial">
+                <input type="hidden" id="editPredialId">
+                
+                <div class="form-group">
+                    <label>Código de Rastreamento:</label>
+                    <p><span class="codigo-badge" id="editPredialCodigo"></span></p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Local *</label>
+                        <input type="text" id="editPredialLocal" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Manutenção *</label>
+                        <select id="editPredialTipo" required>
+                            <option value="eletrica">Elétrica</option>
+                            <option value="hidraulica">Hidráulica</option>
+                            <option value="pintura">Pintura</option>
+                            <option value="estrutural">Estrutural</option>
+                            <option value="limpeza">Limpeza</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Prioridade *</label>
+                        <select id="editPredialPrioridade" required>
+                            <option value="baixa">Baixa</option>
+                            <option value="media">Média</option>
+                            <option value="alta">Alta</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select id="editPredialStatus" required>
+                            <option value="pendente">Pendente</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data Prevista *</label>
+                        <input type="date" id="editPredialDataPrevista" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data de Conclusão</label>
+                        <input type="date" id="editPredialDataConclusao">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Descrição do Problema *</label>
+                    <textarea id="editPredialDescricao" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Observações de Conclusão</label>
+                    <textarea id="editPredialObsConclusao" placeholder="Descreva como o problema foi resolvido..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Imagens</label>
+                    <input type="file" accept="image/*" multiple 
+                           onchange="handleImageUpload(event, editImagesPredial, 'editPredialImagePreview')">
+                    <div id="editPredialImagePreview" class="image-preview"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalEditarPredial')">Cancelar</button>
+                    <button type="submit" class="btn">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Visualizar Manutenção de Equipamento -->
+    <div id="modalViewEquip" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Detalhes da Manutenção de Equipamento</h2>
+                <button class="modal-close" onclick="closeModal('modalViewEquip')">×</button>
+            </div>
+            <div id="viewEquipContent"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalViewEquip')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Editar Manutenção de Equipamento -->
+    <div id="modalEditarEquip" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Editar Manutenção de Equipamento</h2>
+                <button class="modal-close" onclick="closeModal('modalEditarEquip')">×</button>
+            </div>
+            <div id="alertEditEquip"></div>
+            <form id="formEditEquip">
+                <input type="hidden" id="editEquipId">
+                
+                <div class="form-group">
+                    <label>Código de Rastreamento:</label>
+                    <p><span class="codigo-badge" id="editEquipCodigo"></span></p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome do Equipamento *</label>
+                        <input type="text" id="editEquipNome" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Patrimônio/Série</label>
+                        <input type="text" id="editEquipPatrimonio">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tipo de Manutenção *</label>
+                        <select id="editEquipTipo" required>
+                            <option value="preventiva">Preventiva</option>
+                            <option value="corretiva">Corretiva</option>
+                            <option value="preditiva">Preditiva</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select id="editEquipStatus" required>
+                            <option value="pendente">Pendente</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data da Manutenção *</label>
+                        <input type="date" id="editEquipData" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data de Conclusão</label>
+                        <input type="date" id="editEquipDataConclusao">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Responsável</label>
+                    <input type="text" id="editEquipResponsavel">
+                </div>
+
+                <div class="form-group">
+                    <label>Observações *</label>
+                    <textarea id="editEquipObservacoes" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Observações de Conclusão</label>
+                    <textarea id="editEquipObsConclusao" placeholder="Descreva como o serviço foi realizado..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Imagens</label>
+                    <input type="file" accept="image/*" multiple 
+                           onchange="handleImageUpload(event, editImagesEquip, 'editEquipImagePreview')">
+                    <div id="editEquipImagePreview" class="image-preview"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalEditarEquip')">Cancelar</button>
+                    <button type="submit" class="btn">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/app.js"></script>
     <script>
-        // Função para trocar seção ativa
-        function showSection(section) {
-            // Remove classe active de todos os itens do menu
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Remove classe active de todas as seções
-            document.querySelectorAll('.content-section').forEach(sec => {
-                sec.classList.remove('active');
-            });
-            
-            // Adiciona active na seção clicada
-            document.getElementById(section).classList.add('active');
-        }
-
         // Proteger página e inicializar
         document.addEventListener('DOMContentLoaded', function() {
-            const currentUser = protectPage();
-            if (currentUser) {
+            const user = protectPage();
+            if (user) {
                 // Atualizar informações do usuário
-                document.getElementById('userName').textContent = currentUser.nome;
-                document.getElementById('userBadge').textContent = currentUser.perfil || 'Usuário';
+                document.getElementById('userName').textContent = user.nome;
+                document.getElementById('userBadge').textContent = user.perfil || 'Usuário';
                 
                 // Eventos do menu
                 document.getElementById('menuUsuarios').addEventListener('click', function() {
@@ -265,12 +613,27 @@
                 // Evento do botão logout
                 document.getElementById('btnLogoutMenu').addEventListener('click', handleLogout);
 
-                // Eventos dos formulários
+                // Eventos dos formulários principais
                 document.getElementById('formUsuario').addEventListener('submit', handleCadastroUsuario);
                 document.getElementById('formPredial').addEventListener('submit', handleManutencaoPredial);
                 document.getElementById('formEquipamento').addEventListener('submit', handleManutencaoEquipamento);
                 
-                // Carregar dados
+                // Eventos dos formulários de edição
+                document.getElementById('formEditUsuario').addEventListener('submit', salvarEdicaoUsuario);
+                document.getElementById('formPermissoes').addEventListener('submit', salvarPermissoes);
+                document.getElementById('formEditPredial').addEventListener('submit', salvarEdicaoPredial);
+                document.getElementById('formEditEquip').addEventListener('submit', salvarEdicaoEquip);
+                
+                // Fechar modais ao clicar fora
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            this.classList.remove('active');
+                        }
+                    });
+                });
+
+                // Carregar dados iniciais
                 loadUsuarios();
                 loadManutencoesPrediais();
                 loadManutencoesEquipamentos();
