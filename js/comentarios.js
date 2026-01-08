@@ -1,14 +1,7 @@
-// ========================================
-// SISTEMA DE COMENTÁRIOS - FÓRUM
-// ========================================
-
 let currentManutencaoId = null;
-let currentManutencaoType = null; // 'predial' ou 'equipamento'
+let currentManutencaoType = null;
 let commentImages = [];
 
-// ========================================
-// ABRIR FÓRUM DE COMENTÁRIOS
-// ========================================
 async function abrirForumPredial(id) {
     currentManutencaoId = id;
     currentManutencaoType = 'predial';
@@ -23,13 +16,8 @@ async function abrirForumPredial(id) {
 
         if (error) throw error;
 
-        // Renderizar detalhes da manutenção
         renderDetalhesManutencao(data, 'predial');
-        
-        // Carregar comentários
         await loadComentarios(id, 'predial');
-        
-        // Abrir modal
         openModal('modalForumPredial');
         
     } catch (error) {
@@ -52,13 +40,8 @@ async function abrirForumEquipamento(id) {
 
         if (error) throw error;
 
-        // Renderizar detalhes da manutenção
         renderDetalhesManutencao(data, 'equipamento');
-        
-        // Carregar comentários
         await loadComentarios(id, 'equipamento');
-        
-        // Abrir modal
         openModal('modalForumEquipamento');
         
     } catch (error) {
@@ -67,9 +50,6 @@ async function abrirForumEquipamento(id) {
     }
 }
 
-// ========================================
-// RENDERIZAR DETALHES DA MANUTENÇÃO
-// ========================================
 function renderDetalhesManutencao(data, tipo) {
     const contentId = tipo === 'predial' ? 'forumPredialContent' : 'forumEquipamentoContent';
     const content = document.getElementById(contentId);
@@ -131,7 +111,6 @@ function renderDetalhesManutencao(data, tipo) {
         html += `</div></div>`;
     }
     
-    // Verificar se está bloqueado
     const isBloqueado = data.bloqueado || data.status === 'concluido';
     const isAdmin = currentUser && currentUser.perfil === 'admin';
     
@@ -158,9 +137,6 @@ function renderDetalhesManutencao(data, tipo) {
     content.innerHTML = html;
 }
 
-// ========================================
-// CARREGAR COMENTÁRIOS
-// ========================================
 async function loadComentarios(manutencaoId, tipo) {
     try {
         const tabela = tipo === 'predial' ? 'comentarios_predial' : 'comentarios_equipamentos';
@@ -230,9 +206,6 @@ async function loadComentarios(manutencaoId, tipo) {
     }
 }
 
-// ========================================
-// ADICIONAR COMENTÁRIO
-// ========================================
 async function adicionarComentario(tipo) {
     const textareaId = tipo === 'predial' ? 'comentarioPredialText' : 'comentarioEquipamentoText';
     const texto = document.getElementById(textareaId).value.trim();
@@ -257,15 +230,11 @@ async function adicionarComentario(tipo) {
 
         if (error) throw error;
 
-        // Limpar formulário
         document.getElementById(textareaId).value = '';
         commentImages = [];
         updateCommentImagesPreview(tipo);
-        
-        // Recarregar comentários
         await loadComentarios(currentManutencaoId, tipo);
         
-        // Scroll para o último comentário
         const listId = tipo === 'predial' ? 'comentariosPredialList' : 'comentariosEquipamentoList';
         const lista = document.getElementById(listId);
         lista.scrollTop = lista.scrollHeight;
@@ -276,9 +245,6 @@ async function adicionarComentario(tipo) {
     }
 }
 
-// ========================================
-// UPLOAD DE IMAGENS DO COMENTÁRIO
-// ========================================
 function handleCommentImageUpload(event, tipo) {
     const files = Array.from(event.target.files);
     
@@ -293,7 +259,6 @@ function handleCommentImageUpload(event, tipo) {
         }
     });
     
-    // Limpar input
     event.target.value = '';
 }
 
@@ -326,9 +291,6 @@ function removeCommentImage(index, tipo) {
     updateCommentImagesPreview(tipo);
 }
 
-// ========================================
-// DESBLOQUEAR MANUTENÇÃO (APENAS ADMIN)
-// ========================================
 async function desbloquearManutencao(id, tipo) {
     if (currentUser.perfil !== 'admin') {
         alert('Apenas administradores podem desbloquear manutenções!');
@@ -349,7 +311,6 @@ async function desbloquearManutencao(id, tipo) {
 
         alert('Manutenção desbloqueada com sucesso!');
         
-        // Recarregar
         if (tipo === 'predial') {
             closeModal('modalForumPredial');
             loadManutencoesPrediais();
@@ -364,28 +325,6 @@ async function desbloquearManutencao(id, tipo) {
     }
 }
 
-// ========================================
-// BLOQUEAR AO CONCLUIR
-// ========================================
-async function bloquearManutencaoAoConcluir(id, tipo) {
-    try {
-        const tabela = tipo === 'predial' ? 'manutencao_predial' : 'manutencao_equipamentos';
-        
-        const { error } = await db
-            .from(tabela)
-            .update({ bloqueado: true })
-            .eq('id', id);
-
-        if (error) throw error;
-        
-    } catch (error) {
-        console.error('Erro ao bloquear:', error);
-    }
-}
-
-// ========================================
-// UTILITÁRIOS
-// ========================================
 function formatarDataComentario(dataStr) {
     const data = new Date(dataStr);
     const agora = new Date();
@@ -405,7 +344,6 @@ function formatarDataComentario(dataStr) {
 }
 
 function openImageModal(imageSrc) {
-    // Criar modal simples para visualizar imagem
     const modal = document.createElement('div');
     modal.className = 'modal active';
     modal.style.zIndex = '2000';
