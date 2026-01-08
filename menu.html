@@ -1248,6 +1248,10 @@
                 <span class="menu-icon">⚙️</span>
                 <span>Equipamentos</span>
             </div>
+            <div class="menu-item" id="menuOcorrencias">
+                <span class="menu-icon">📋</span>
+                <span>Ocorrências</span>
+            </div>
         </div>
     </div>
 
@@ -1429,6 +1433,88 @@
                     <div class="loading">
                         <div class="spinner"></div>
                         <p>Carregando manutenções...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section" id="ocorrencias">
+            <div class="card">
+                <h2>📋 Central de Ocorrências</h2>
+                <p style="color: #666; margin-bottom: 24px;">Visualize e gerencie todas as ocorrências de manutenção predial e de equipamentos em um só lugar.</p>
+                
+                <div class="filters-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #333;">🔍 Filtros</h3>
+                    
+                    <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Tipo de Manutenção</label>
+                            <select id="filtroTipoManutencao">
+                                <option value="">Todos</option>
+                                <option value="predial">Predial</option>
+                                <option value="equipamento">Equipamento</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Status</label>
+                            <select id="filtroStatus">
+                                <option value="">Todos</option>
+                                <option value="pendente">Pendente</option>
+                                <option value="andamento">Em Andamento</option>
+                                <option value="concluido">Concluído</option>
+                                <option value="cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Prioridade</label>
+                            <select id="filtroPrioridade">
+                                <option value="">Todas</option>
+                                <option value="baixa">Baixa</option>
+                                <option value="media">Média</option>
+                                <option value="alta">Alta</option>
+                                <option value="urgente">Urgente</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Criado Por</label>
+                            <select id="filtroCriadoPor">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Data Inicial</label>
+                            <input type="date" id="filtroDataInicio">
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Data Final</label>
+                            <input type="date" id="filtroDataFim">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button class="btn" onclick="aplicarFiltros()" style="flex: 0 0 auto;">
+                            🔍 Aplicar Filtros
+                        </button>
+                        <button class="btn btn-secondary" onclick="limparFiltros()" style="flex: 0 0 auto;">
+                            ↺ Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchOcorrencias" placeholder="🔍 Buscar por código, local, equipamento ou tipo...">
+                    <span class="search-icon">🔍</span>
+                </div>
+
+                <div id="listaOcorrencias">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Carregando ocorrências...</p>
                     </div>
                 </div>
             </div>
@@ -1871,6 +1957,7 @@
 
     <script src="js/app.js"></script>
     <script src="js/comentarios.js"></script>
+    <script src="js/ocorrencias.js"></script>
     <script>
         const hamburgerBtn = document.getElementById('hamburgerBtn');
         const sidebar = document.getElementById('sidebar');
@@ -1906,6 +1993,7 @@
                 const menuUsuarios = document.getElementById('menuUsuarios');
                 const menuPredial = document.getElementById('menuPredial');
                 const menuEquipamentos = document.getElementById('menuEquipamentos');
+                const menuOcorrencias = document.getElementById('menuOcorrencias');
                 
                 if (!hasPermission('perm_usuarios_visualizar')) {
                     menuUsuarios.style.display = 'none';
@@ -1917,6 +2005,11 @@
                 
                 if (!hasPermission('perm_equipamentos_visualizar')) {
                     menuEquipamentos.style.display = 'none';
+                }
+                
+                const canViewOcorrencias = hasPermission('perm_predial_visualizar') || hasPermission('perm_equipamentos_visualizar');
+                if (!canViewOcorrencias) {
+                    menuOcorrencias.style.display = 'none';
                 }
                 
                 let firstVisibleSection = null;
@@ -1951,6 +2044,7 @@
                 setupMenuClick(menuUsuarios, 'usuarios');
                 setupMenuClick(menuPredial, 'predial');
                 setupMenuClick(menuEquipamentos, 'equipamentos');
+                setupMenuClick(menuOcorrencias, 'ocorrencias');
 
                 document.getElementById('btnLogoutMenu').addEventListener('click', handleLogout);
                 document.getElementById('formUsuario').addEventListener('submit', handleCadastroUsuario);
@@ -1972,6 +2066,8 @@
                 loadUsuarios();
                 loadManutencoesPrediais();
                 loadManutencoesEquipamentos();
+                loadOcorrencias();
+                populateFiltroUsuarios();
             }
         });
     </script>
