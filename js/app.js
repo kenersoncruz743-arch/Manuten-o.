@@ -1,6 +1,3 @@
-// ========================================
-// CONFIGURAÇÃO DO SUPABASE
-// ========================================
 const SUPABASE_URL = 'https://wcfrwsgnxochxvwhxnvy.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjZnJ3c2dueG9jaHh2d2h4bnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzExMDgsImV4cCI6MjA4MzIwNzEwOH0.Yb4cT5chXp3S8NZaWbLpv436HzxGCO7CZTruPpOPDdU';
 
@@ -15,9 +12,6 @@ function initSupabase() {
     return window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
-// ========================================
-// FUNÇÕES DE SESSÃO
-// ========================================
 function checkSession() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
@@ -46,18 +40,12 @@ function protectPage() {
     return user;
 }
 
-// ========================================
-// VERIFICAÇÃO DE PERMISSÕES
-// ========================================
 function hasPermission(permission) {
     if (!currentUser) return false;
     if (currentUser.perfil === 'admin') return true;
     return currentUser[permission] === true;
 }
 
-// ========================================
-// FUNÇÕES DE ALERTA
-// ========================================
 function showAlert(elementId, message, type) {
     const alertBox = document.getElementById(elementId);
     if (alertBox) {
@@ -66,9 +54,6 @@ function showAlert(elementId, message, type) {
     }
 }
 
-// ========================================
-// FUNÇÕES DE MODAL
-// ========================================
 function openModal(modalId) {
     document.getElementById(modalId).classList.add('active');
 }
@@ -77,18 +62,12 @@ function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
 }
 
-// ========================================
-// GERADOR DE CÓDIGO ALFANUMÉRICO
-// ========================================
 function generateCode(prefix) {
     const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
     const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
     return `${prefix}-${date}-${random}`;
 }
 
-// ========================================
-// AUTENTICAÇÃO
-// ========================================
 async function handleLogin(event) {
     event.preventDefault();
     
@@ -140,9 +119,6 @@ function handleLogout() {
     }
 }
 
-// ========================================
-// GESTÃO DE USUÁRIOS
-// ========================================
 async function handleCadastroUsuario(event) {
     event.preventDefault();
     
@@ -178,7 +154,6 @@ async function handleCadastroUsuario(event) {
             return;
         }
 
-        // Definir permissões padrão baseadas no perfil
         const permissoes = getDefaultPermissions(perfil);
 
         const { error } = await db
@@ -316,7 +291,6 @@ async function loadUsuarios() {
         html += '</tbody></table></div>';
         lista.innerHTML = html;
 
-        // Adicionar event listener para busca
         document.getElementById('searchUsuarios').addEventListener('input', function(e) {
             filterTable('tabelaUsuarios', e.target.value);
         });
@@ -387,7 +361,6 @@ async function salvarEdicaoUsuario(event) {
         closeModal('modalEditarUsuario');
         loadUsuarios();
 
-        // Se editou o próprio usuário, atualizar sessão
         if (parseInt(id) === currentUser.id) {
             const { data } = await db
                 .from('usuarios')
@@ -416,7 +389,6 @@ async function editarPermissoes(userId) {
         document.getElementById('permUsuarioId').value = data.id;
         document.getElementById('permUsuarioNome').textContent = data.nome;
         
-        // Marcar checkboxes das permissões
         document.getElementById('permUsuariosVisualizar').checked = data.perm_usuarios_visualizar;
         document.getElementById('permUsuariosCriar').checked = data.perm_usuarios_criar;
         document.getElementById('permUsuariosEditar').checked = data.perm_usuarios_editar;
@@ -467,7 +439,6 @@ async function salvarPermissoes(event) {
         closeModal('modalPermissoes');
         loadUsuarios();
 
-        // Se editou o próprio usuário, atualizar sessão
         if (parseInt(id) === currentUser.id) {
             const { data } = await db
                 .from('usuarios')
@@ -502,9 +473,6 @@ async function excluirUsuario(userId) {
     }
 }
 
-// ========================================
-// MANUTENÇÃO PREDIAL
-// ========================================
 let selectedImagesPredial = [];
 
 async function handleManutencaoPredial(event) {
@@ -624,7 +592,6 @@ async function loadManutencoesPrediais() {
         html += '</tbody></table></div>';
         lista.innerHTML = html;
 
-        // Adicionar event listener para busca
         document.getElementById('searchPredial').addEventListener('input', function(e) {
             filterTable('tabelaPredial', e.target.value);
         });
@@ -633,108 +600,6 @@ async function loadManutencoesPrediais() {
         console.error('Erro:', error);
         document.getElementById('listaPredial').innerHTML = 
             '<p class="loading">Erro ao carregar manutenções.</p>';
-    }
-}
-
-async function visualizarManutencaoPredial(id) {
-    try {
-        const { data, error } = await db
-            .from('manutencao_predial')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-        if (error) throw error;
-
-        const dataPrevista = new Date(data.data_prevista).toLocaleDateString('pt-BR');
-        const dataConclusao = data.data_conclusao ? 
-            new Date(data.data_conclusao).toLocaleDateString('pt-BR') : '-';
-
-        let html = `
-            <div class="form-group">
-                <label>Código de Rastreamento:</label>
-                <p><span class="codigo-badge">${data.codigo}</span></p>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Local:</label>
-                    <p>${data.local}</p>
-                </div>
-                <div class="form-group">
-                    <label>Tipo:</label>
-                    <p>${data.tipo}</p>
-                </div>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Prioridade:</label>
-                    <p><span class="badge badge-${data.prioridade}">${data.prioridade}</span></p>
-                </div>
-                <div class="form-group">
-                    <label>Status:</label>
-                    <p><span class="badge badge-${data.status}">${data.status}</span></p>
-                </div>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Data Prevista:</label>
-                    <p>${dataPrevista}</p>
-                </div>
-                <div class="form-group">
-                    <label>Data Conclusão:</label>
-                    <p>${dataConclusao}</p>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Descrição:</label>
-                <p>${data.descricao}</p>
-            </div>
-        `;
-
-        if (data.observacoes_conclusao) {
-            html += `
-                <div class="form-group">
-                    <label>Observações de Conclusão:</label>
-                    <p>${data.observacoes_conclusao}</p>
-                </div>
-            `;
-        }
-
-        if (data.imagens && data.imagens.length > 0) {
-            html += `
-                <div class="form-group">
-                    <label>Imagens:</label>
-                    <div class="image-preview">
-            `;
-            data.imagens.forEach(img => {
-                html += `
-                    <div class="image-preview-item">
-                        <img src="${img}" alt="Imagem da manutenção">
-                    </div>
-                `;
-            });
-            html += `</div></div>`;
-        }
-
-        html += `
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Criado por:</label>
-                    <p>${data.criado_por || '-'}</p>
-                </div>
-                <div class="form-group">
-                    <label>Concluído por:</label>
-                    <p>${data.concluido_por || '-'}</p>
-                </div>
-            </div>
-        `;
-
-        document.getElementById('viewPredialContent').innerHTML = html;
-        openModal('modalViewPredial');
-
-    } catch (error) {
-        console.error('Erro:', error);
-        showAlert('alertPredial', 'Erro ao carregar dados.', 'error');
     }
 }
 
@@ -809,7 +674,6 @@ async function salvarEdicaoPredial(event) {
             if (!updateData.concluido_por) {
                 updateData.concluido_por = currentUser.nome;
             }
-            // Bloquear automaticamente ao concluir
             updateData.bloqueado = true;
         }
 
@@ -830,9 +694,6 @@ async function salvarEdicaoPredial(event) {
     }
 }
 
-// ========================================
-// MANUTENÇÃO DE EQUIPAMENTOS
-// ========================================
 let selectedImagesEquip = [];
 
 async function handleManutencaoEquipamento(event) {
@@ -955,7 +816,6 @@ async function loadManutencoesEquipamentos() {
         html += '</tbody></table></div>';
         lista.innerHTML = html;
 
-        // Adicionar event listener para busca
         document.getElementById('searchEquipamentos').addEventListener('input', function(e) {
             filterTable('tabelaEquipamentos', e.target.value);
         });
@@ -964,112 +824,6 @@ async function loadManutencoesEquipamentos() {
         console.error('Erro:', error);
         document.getElementById('listaEquipamentos').innerHTML = 
             '<p class="loading">Erro ao carregar manutenções.</p>';
-    }
-}
-
-async function visualizarManutencaoEquip(id) {
-    try {
-        const { data, error } = await db
-            .from('manutencao_equipamentos')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-        if (error) throw error;
-
-        const dataManutencao = new Date(data.data_manutencao).toLocaleDateString('pt-BR');
-        const dataConclusao = data.data_conclusao ? 
-            new Date(data.data_conclusao).toLocaleDateString('pt-BR') : '-';
-
-        let html = `
-            <div class="form-group">
-                <label>Código de Rastreamento:</label>
-                <p><span class="codigo-badge">${data.codigo}</span></p>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Equipamento:</label>
-                    <p>${data.equipamento}</p>
-                </div>
-                <div class="form-group">
-                    <label>Patrimônio:</label>
-                    <p>${data.patrimonio || '-'}</p>
-                </div>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Tipo:</label>
-                    <p>${data.tipo}</p>
-                </div>
-                <div class="form-group">
-                    <label>Status:</label>
-                    <p><span class="badge badge-${data.status}">${data.status}</span></p>
-                </div>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Data Manutenção:</label>
-                    <p>${dataManutencao}</p>
-                </div>
-                <div class="form-group">
-                    <label>Data Conclusão:</label>
-                    <p>${dataConclusao}</p>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Responsável:</label>
-                <p>${data.responsavel || '-'}</p>
-            </div>
-            <div class="form-group">
-                <label>Observações:</label>
-                <p>${data.observacoes}</p>
-            </div>
-        `;
-
-        if (data.observacoes_conclusao) {
-            html += `
-                <div class="form-group">
-                    <label>Observações de Conclusão:</label>
-                    <p>${data.observacoes_conclusao}</p>
-                </div>
-            `;
-        }
-
-        if (data.imagens && data.imagens.length > 0) {
-            html += `
-                <div class="form-group">
-                    <label>Imagens:</label>
-                    <div class="image-preview">
-            `;
-            data.imagens.forEach(img => {
-                html += `
-                    <div class="image-preview-item">
-                        <img src="${img}" alt="Imagem da manutenção">
-                    </div>
-                `;
-            });
-            html += `</div></div>`;
-        }
-
-        html += `
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Criado por:</label>
-                    <p>${data.criado_por || '-'}</p>
-                </div>
-                <div class="form-group">
-                    <label>Concluído por:</label>
-                    <p>${data.concluido_por || '-'}</p>
-                </div>
-            </div>
-        `;
-
-        document.getElementById('viewEquipContent').innerHTML = html;
-        openModal('modalViewEquip');
-
-    } catch (error) {
-        console.error('Erro:', error);
-        showAlert('alertEquipamentos', 'Erro ao carregar dados.', 'error');
     }
 }
 
@@ -1147,7 +901,6 @@ async function salvarEdicaoEquip(event) {
             if (!updateData.concluido_por) {
                 updateData.concluido_por = currentUser.nome;
             }
-            // Bloquear automaticamente ao concluir
             updateData.bloqueado = true;
         }
 
@@ -1168,9 +921,6 @@ async function salvarEdicaoEquip(event) {
     }
 }
 
-// ========================================
-// UPLOAD DE IMAGENS
-// ========================================
 function handleImageUpload(event, imageArray, previewId) {
     const files = Array.from(event.target.files);
     
@@ -1223,9 +973,6 @@ function removeImage(index, previewId) {
     }
 }
 
-// ========================================
-// NAVEGAÇÃO
-// ========================================
 function showSection(section) {
     document.querySelectorAll('.menu-item').forEach(item => {
         item.classList.remove('active');
@@ -1238,9 +985,6 @@ function showSection(section) {
     document.getElementById(section).classList.add('active');
 }
 
-// ========================================
-// FUNÇÃO DE BUSCA/FILTRO
-// ========================================
 function filterTable(tableId, searchTerm) {
     const table = document.getElementById(tableId);
     if (!table) return;
@@ -1262,7 +1006,6 @@ function filterTable(tableId, searchTerm) {
         }
     }
     
-    // Mostrar mensagem se nenhum resultado for encontrado
     const container = table.closest('.table-container') || table.parentElement;
     let noResults = container.querySelector('.no-results-message');
     
@@ -1282,9 +1025,6 @@ function filterTable(tableId, searchTerm) {
     }
 }
 
-// ========================================
-// INICIALIZAÇÃO
-// ========================================
 document.addEventListener('DOMContentLoaded', function() {
     db = initSupabase();
     
